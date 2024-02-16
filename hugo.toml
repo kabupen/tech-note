@@ -1,4 +1,5 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://kabupen.github.io/tech-note/'
 languageCode = 'ja'
 title = '機械学習の迷路'
 theme = 'hugo-theme-stack'
+publishDir = "docs"
