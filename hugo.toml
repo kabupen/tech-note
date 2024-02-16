@@ -1,0 +1,4 @@
+baseURL = 'https://example.org/'
+languageCode = 'ja'
+title = '機械学習の迷路'
+theme = 'hugo-theme-stack'
