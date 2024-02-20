@@ -1,7 +1,7 @@
 +++
 title = 'YOLO-World: Real-Time Open-Vocabulary Object Detection'
 date = 2024-02-20T10:39:08+09:00
-draft = true
+draft = false
 math = true
 tags = []
 categories = []
@@ -122,5 +122,5 @@ $$
 {{< figure src="20240220-113027.png" width="300" >}} 
 
 
-YOLO-World では以上のように、従来の YOLO アーキテクチャをベースとしながら RepVL-APN におけるテキストと画像との融合処理をうまく導入することでリアルタイム性を持った OVD を実現できています。
+YOLO-World では以上のように、従来の YOLO アーキテクチャをベースとしながら RepVL-APN におけるテキストと画像との融合処理をうまく導入することでリアルタイム性を持った OVD を実現できています。t 
 
