@@ -1,7 +1,7 @@
 +++
 title = 'Neural Network Diffusion'
 date = 2024-02-22T11:08:43+09:00
-draft = true
+draft = false
 math = true
 tags = ["Diffusion model"]
 categories = ["arxiv"]
