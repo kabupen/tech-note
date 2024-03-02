@@ -1,0 +1,3 @@
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^kabupen.com
+RewriteRule (.*) http://www.kabupen.com/$1 [R=301,L]
