@@ -1,7 +1,7 @@
 +++
 title = '鳥コンペ　(Cornell Birdcall Identification)'
 date = 2024-03-05T23:36:12+09:00
-draft = true
+draft = false
 math = true
 categories = ["Kaggle"]
 tags = []
