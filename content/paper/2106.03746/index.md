@@ -1,10 +1,10 @@
 +++
 title = 'Efficient Training of Visual Transformers with Small Datasets'
 date = 2024-03-05T19:28:32+09:00
-draft = true
+draft = false
 math = true
-tags = []
-categories = []
+categories = ["arxiv"]
+tags = ["Vision Transformer"]
 toc = true
 +++
 
