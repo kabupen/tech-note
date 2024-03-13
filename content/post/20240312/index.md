@@ -1,9 +1,9 @@
 +++
-title = '半教師あり学習'
+title = '半教師あり学習（Semi-Supervied Learning; SSL）について'
 date = 2024-03-06T19:42:59+09:00
-draft = true
+draft = false 
 math = true
-categories = []
+categories = ["機械学習"]
 tags = []
 toc = true
 +++
@@ -102,8 +102,6 @@ Noisy Student は [[Q. Xie et. al, 2020]](https://arxiv.org/pdf/1911.04252.pdf) 
 
 
 
-#### S4L
-
 
 
 
@@ -124,11 +122,27 @@ Meta Pseudo Labels（MPL）は [[H. Pham et. al, 2020]](https://arxiv.org/abs/20
 
 
 
-### Hybrid
-
-上記２つの手法を取り入れたものとして、MixMatch、FixMatch などが挙げられます。
+### Hybrid Methods
 
 
+
+
+pseudo-label、entropy minimization に加えて、本ブログでは紹介しなかった consistency regularization を組みあせて精度向上を図っている手法をここでは hybrid methods として紹介します。
+
+
+
+#### MixMatch
+
+
+MixMatch は [[D. Berthelot et al., 2019]](https://arxiv.org/pdf/1905.02249.pdf) で提案された手法で、ラベル無しデータに複数回 augmentation を加え、それらの平均を擬似ラベルとして割り当てます。温度パラメーターを用いて予測分布を尖鋭化することで（sharpen）、予測がより低エントロピーとなるようにしています。
+
+{{< figure src="./20240313-235333.png" width=700 >}}
+
+#### FixMatch
+
+FixMatch は[[K. Sohn et al., 2020]](https://arxiv.org/ftp/arxiv/papers/2001/2001.07685.pdf) で提案された手法で、MixMatch の後継的な手法です。ラベル無しデータに対して弱い augmentation と強い augmentation を掛け、それらの出力の性質が変わらないように学習を進めていきます。
+
+{{< figure src="./20240313-235617.png" width=600 >}}
 
 ## 参考情報
 
