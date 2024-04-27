@@ -1,7 +1,7 @@
 +++
 title = 'AVFoundation について'
 date = 2024-04-24T22:21:35+09:00
-draft = true
+draft = false
 math = true
 categories = ["Swift"]
 tags = []
