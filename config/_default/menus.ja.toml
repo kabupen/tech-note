@@ -11,46 +11,46 @@
 # このメニューは weight が低い値から高い値に順に表示されます。
 
 [[main]]
-  name = "資料"
-  pageRef = "docs"
+  name = "Post"
+  pageRef = "post"
   weight = 10
 
-[[main]]
-  name = "ショートコード"
-  pageRef = "docs/shortcodes"
-  weight = 15
+# [[main]]
+#   name = "ショートコード"
+#   pageRef = "docs/shortcodes"
+#   weight = 15
 
-[[main]]
-  name = "例"
-  weight = 20
-
-[[main]]
-  name = "サンプル"
-  parent = "例"
-  pageRef = "samples"
-  weight = 16
-
-[[main]]
-  name = "ショーケース"
-  parent = "例"
-  pageRef = "examples"
-  weight = 30
-
-[[main]]
-  name = "レシピ"
-  parent = "例"
-  pageRef = "guides"
-  weight = 40
-
-[[main]]
-  name = "ユーザー"
-  pageRef = "users"
-  weight = 90
-
-[[main]]
-  name = "グッズ"
-  url = "https://www.teepublic.com/user/blowfish-store/t-shirts"
-  weight = 100
+# [[main]]
+#   name = "例"
+#   weight = 20
+# 
+# [[main]]
+#   name = "サンプル"
+#   parent = "例"
+#   pageRef = "samples"
+#   weight = 16
+# 
+# [[main]]
+#   name = "ショーケース"
+#   parent = "例"
+#   pageRef = "examples"
+#   weight = 30
+# 
+# [[main]]
+#   name = "レシピ"
+#   parent = "例"
+#   pageRef = "guides"
+#   weight = 40
+# 
+# [[main]]
+#   name = "ユーザー"
+#   pageRef = "users"
+#   weight = 90
+# 
+# [[main]]
+#   name = "グッズ"
+#   url = "https://www.teepublic.com/user/blowfish-store/t-shirts"
+#   weight = 100
 
 #[[main]]
 #  name = "テスト"
@@ -80,12 +80,12 @@
 # このフッターメニューはページ下部のコピーライト表示の前に表示されます。
 # 上記のメインメニューと同様に設定できます。
 
- [[footer]]
-   name = "タグ"
-   pageRef = "tags"
-   weight = 10
+[[footer]]
+  name = "From 2024"
+  pageRef = "tags"
+  weight = 10
 
- [[footer]]
-   name = "著者"
-   pageRef = "authors"
-   weight = 20
+[[footer]]
+  name = "@kabupen"
+  pageRef = "authors"
+  weight = 20

@@ -5,6 +5,3 @@
 	path = themes/blowfish
 	url = https://github.com/kabupen/blowfish.git
 	branch = main
-[submodule "blowfish"]
-	path = blowfish
-	url = https://github.com/kabupen/blowfish.git
