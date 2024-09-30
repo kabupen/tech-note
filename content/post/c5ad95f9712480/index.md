@@ -1,5 +1,5 @@
 +++
-title = 'VAE 理解までの道のり #2'
+title = "VAE 理解までの道のり #2"
 date = 2024-03-02T00:53:11+09:00
 draft = true
 math = true
@@ -11,7 +11,7 @@ toc = true
 
 ## 前回までのおさらい
 
-{{< ref "/post/20240218/index.md" >}}
+{{< ref "/post/232c9edf1cb46e/index.md" >}}
 
 
 ## 平均場近似の計算例
