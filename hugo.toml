@@ -7,5 +7,5 @@ publishDir = "public"
 [menus]
   [[menus.main]]
     name = 'Post'
-    pageRef = '/posts/'
+    pageRef = '/post/'
     weight = 30
