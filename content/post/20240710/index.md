@@ -1,6 +1,6 @@
 +++
 title = '不偏推定量について'
-date = 2024-04-27T09:36:13+09:00
+date = 2024-07-10
 draft = false
 math = true
 categories = ["統計検定"]
@@ -8,7 +8,6 @@ tags = []
 toc = false
 +++
 
-{{< katex >}}
 
 
 ## 平均、分散の定義

@@ -18,3 +18,6 @@
 $$
 \sup P_\theta( X \in R) \leq \alpha
 $$
+
+
+$\alpha$ は有意水準といい、$\alpha=0.05, 0.01$ の値がよく用いられます。

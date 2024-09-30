@@ -1,6 +1,6 @@
 +++
 title = 'NeRF の基本'
-date = 2024-04-27T09:36:13+09:00
+date = 2024-06-14
 draft = false
 math = true
 categories = ["NeRF"]
@@ -8,7 +8,6 @@ tags = []
 toc = false
 +++
 
-{{< katex >}}
 
 NeRF について理論背景から抑えていきたいと思います。
 

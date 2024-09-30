@@ -1,6 +1,6 @@
 +++
 title = '不偏分散'
-date = 2024-04-27T09:36:13+09:00
+date = 2024-06-22
 draft = false
 math = true
 categories = ["統計検定"]
@@ -8,7 +8,6 @@ tags = []
 toc = false
 +++
 
-{{< katex >}}
 
 
 ## レンダリング
