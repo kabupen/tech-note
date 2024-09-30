@@ -274,10 +274,6 @@ $$
 
 
 
-## 参考情報
-
-- [Difference between AutoEncoder (AE) and Variational AutoEncoder (VAE)](https://towardsdatascience.com/difference-between-autoencoder-ae-and-variational-autoencoder-vae-ed7be1c038f2)
-- [Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
 
 
 [^1]: [時系列データに対する Disentangle された表現学習](https://www.jstage.jst.go.jp/article/pjsai/JSAI2018/0/JSAI2018_1Z303/_pdf/-char/ja)

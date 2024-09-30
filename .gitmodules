@@ -5,3 +5,6 @@
 	path = themes/blowfish
 	url = https://github.com/kabupen/blowfish.git
 	branch = main
+[submodule "themes/hugo-bearcub"]
+	path = themes/hugo-bearcub
+	url = https://github.com/clente/hugo-bearcub
