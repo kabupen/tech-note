@@ -1,0 +1,11 @@
+theme = "hugo-bearblog"
+baseURL = 'https://www.kabupen.com/'
+defaultContentLanguage = "ja"
+disableLanguages = [] #to allow translation work requiring shipping to production
+publishDir = "public"
+
+[menus]
+  [[menus.main]]
+    name = 'Post'
+    pageRef = '/posts/'
+    weight = 30
