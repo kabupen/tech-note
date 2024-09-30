@@ -1,6 +1,0 @@
-baseURL = 'https://www.kabupen.com/'
-languageCode = 'ja'
-title = '機械学習の迷路'
-theme = 'hugo-theme-stack'
-publishDir = "public"
-googleAnalytics = "G-0VXPKE53FL"
