@@ -9,3 +9,8 @@ publishDir = "public"
     name = 'Post'
     pageRef = '/post/'
     weight = 30
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
