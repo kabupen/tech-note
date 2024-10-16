@@ -1,7 +1,7 @@
 +++
 title = 'マルコフの不等式・チェビシェフの不等式'
 date = 2024-10-16T09:59:36+09:00
-draft = true
+draft = false
 categories = []
 tags = ["統計"]
 +++
