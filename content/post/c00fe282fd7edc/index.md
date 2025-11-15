@@ -2,8 +2,7 @@
 title = 'ワルド検定'
 date = 2024-10-01
 draft = false
-categories = ["統計"]
-tags = []
+tags = ["統計"]
 +++
 
 # ワルド検定

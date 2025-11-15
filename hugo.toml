@@ -14,3 +14,8 @@ publishDir = "public"
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNos = true # 必要なら行番号を表示
+    style = "base16-snazzy"

@@ -9,36 +9,46 @@ title = "tech bear"
 # ʕ•ᴥ•ʔ tech blog ʕ•ᴥ•ʔ 
 
 
-<div>
+<div style="text-align: center;">
     <img src="/images/success_kid.jpg" style="width: 300px;">
 </div>
-「がんばるしかない」
+<p style="text-align: center;">「がんばるしかない」</p>
 
-### 各ブログ
+## 各ブログ
 
-<div style="display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-        <div style="width: 50px; min-width: 50px; margin-right: 15px;">
-            <img src="/images/icon_github.png" alt="GitHub" style="width: 100%; height: auto;">
-        </div>
+<table style="width: 400px; margin: 0;">
+  <tr>
+    <td style="text-align: center;">
+      <a href="https://github.com/kabupen" target="_blank">
+        <img src="/images/icon_github.png" alt="GitHub" style="height: 48px;">
+      </a>
+    </td>
+    <td style="text-align: center;">
+      <a href="https://zenn.dev/kabupen" target="_blank">
+        <img src="/images/icon_zenn.png" alt="Zenn" style="height: 25px;">
+      </a>
+    </td>
+    <td style="text-align: center;">
+      <a href="https://qiita.com/kabupen" target="_blank">
+        <img src="/images/icon_qiita.png" alt="Qiita" style="height: 48px;">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; vertical-align: top;">
         <a href="https://github.com/kabupen" target="_blank">GitHub</a>
-    </div>
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-        <div style="width: 50px; min-width: 50px; margin-right: 15px;">
-            <img src="/images/icon_zenn.png" alt="Zenn" style="width: 100%; height: auto;">
-        </div>
+    </td>
+    <td style="text-align: center; vertical-align: top;">
         <a href="https://zenn.dev/kabupen" target="_blank">Zenn</a>
-    </div>
-    <div style="display: flex; align-items: center;">
-        <div style="width: 50px; min-width: 50px; margin-right: 15px;">
-            <img src="/images/icon_qiita.png" alt="Qiita" style="width: 100%; height: auto;">
-        </div>
+    </td>
+    <td style="text-align: center; vertical-align: top;">
         <a href="https://qiita.com/kabupen" target="_blank">Qiita</a>
-    </div>
-</div>
+    </td>
+  </tr>
+</table>
 
 
-### 最近の投稿
+## 最近の投稿
 
 {{< recent_post >}}
 
