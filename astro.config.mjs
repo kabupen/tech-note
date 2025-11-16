@@ -21,4 +21,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  // Github actions
+  site: "https://kabupen.com/"
 });
