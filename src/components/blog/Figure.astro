@@ -1,0 +1,49 @@
+---
+import { Image } from "astro:assets";
+
+// src/content/blog 以下の画像を全部集める
+// Figure.astro は src/components にある前提
+const images = import.meta.glob(
+  "/src/content/blog/**/*.{png,jpg,jpeg,gif,webp,svg}",
+  { eager: true },
+);
+
+type Props = {
+  src: string; // "2f1dce0ac8eb-20240205.png" みたいなファイル名
+  alt: string;
+  width?: number;
+  caption?: string;
+};
+
+const { src, alt, width, caption } = Astro.props;
+
+// images の key は "/src/content/blog/xxx/ファイル名.png" のようになるので、
+// 末尾のファイル名で一致するものを探す
+const entry = Object.entries(images).find(([path]) => path.endsWith("/" + src));
+
+const imageModule = entry ? (entry[1] as any) : null;
+---
+
+{
+  imageModule ? (
+    <figure class="my-6">
+      <Image
+        src={imageModule.default}
+        alt={alt}
+        width={width}
+        class="mx-auto"
+      />
+      {caption && (
+        <figcaption class="mt-2 text-center text-sm text-gray-500">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  ) : (
+    <figure class="my-6 border border-red-300 bg-red-50 p-2 text-sm text-red-800">
+      <p>
+        画像「{src},{images[0]},{entry}」が見つかりませんでした。
+      </p>
+    </figure>
+  )
+}

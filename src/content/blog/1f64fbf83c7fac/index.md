@@ -1,12 +1,10 @@
 ---
 title: 'ガンマ関数・ガンマ分布・カイ二乗について'
-description: ''
-pubDate: '2024-06-15'
-updatedDate: '2024-06-15'
+description: ""
+pubDate: 2024-06-15
 heroImage: '@/assets/blog-placeholder-2.jpg'
 tags: ["統計", "確率"]
 ---
-
 # はじめに
 
 
