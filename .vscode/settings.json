@@ -5,11 +5,6 @@
   // デフォルトは Prettier（お好みで）
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-  // Astro ファイルは Astro 拡張のフォーマッタを使う
-  "[astro]": {
-    "editor.defaultFormatter": "astro-build.astro-vscode"
-  },
-
   // ついでに…
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

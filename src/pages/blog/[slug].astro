@@ -2,17 +2,18 @@
 // src/pages/blog/[slug].astro
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import BlogPost from "@/layouts/BlogPost.astro";
+import { getBlogSlugFromId } from "@/utils/blogSlug";
 
 export async function getStaticPaths() {
-	const posts = await getCollection("blog");
+  const posts = await getCollection("blog");
 
-	return posts.map((post) => {
-		const slug = post.id.replace(/\/index$/, "");
-		return {
-			params: { slug },
-			props: post,
-		};
-	});
+  return posts.map((post) => {
+    const slug = getBlogSlugFromId(post.id);
+    return {
+      params: { slug },
+      props: post,
+    };
+  });
 }
 
 type Props = CollectionEntry<"blog">;
@@ -21,5 +22,5 @@ const { Content, headings } = await render(post);
 ---
 
 <BlogPost {...post.data} headings={headings}>
-	<Content />
+  <Content />
 </BlogPost>
