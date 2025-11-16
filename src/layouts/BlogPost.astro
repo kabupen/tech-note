@@ -1,0 +1,222 @@
+---
+import "../styles/global.css";
+
+import BaseHead from "@/components/BaseHead.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+
+import BlogCard from "@/components/blog/BlogCard.astro";
+import BlogHeader from "@/components/blog/BlogHeader.astro";
+import BlogToc from "@/components/blog/BlogToc.astro";
+import BlogRelatedPosts from "@/components/blog/BlogRelatedPosts.astro";
+import BlogContent from "@/components/blog/BlogContent.astro";
+
+import type { CollectionEntry } from "astro:content";
+
+type BlogEntry = CollectionEntry<"blog">["data"];
+
+type TocItem = {
+  depth: number;
+  slug: string;
+  text: string;
+};
+
+type RelatedPost = {
+  url: string;
+  title: string;
+  pubDate?: string | Date;
+};
+
+const {
+  headings = [],
+  toc: tocFromProps,
+  relatedPosts = [],
+  ...frontmatter
+} = Astro.props as {
+  headings?: TocItem[];
+  toc?: TocItem[];
+  relatedPosts?: RelatedPost[];
+} & BlogEntry;
+
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  tags = [],
+} = frontmatter;
+
+const toc: TocItem[] =
+  tocFromProps && tocFromProps.length > 0
+    ? tocFromProps
+    : (headings as TocItem[]).filter((h) => h.depth >= 1 && h.depth <= 4);
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body
+    class="min-h-screen bg-slate-50 font-sans text-[13px] text-slate-900 antialiased sm:text-[14px]"
+  >
+    <Header />
+
+    {
+      /*
+      記事カード + 目次の 2 カラムレイアウト
+    */
+    }
+    <main class="mx-auto max-w-7xl px-4 pb-10 pt-0 sm:px-6 lg:px-6 lg:pb-14">
+      <div class="flex gap-1">
+        {
+          /*
+          左カラム: BlogCard（キャッチ画像 + 記事）＋ 関連記事
+        */
+        }
+        <div class="flex-1 min-w-0">
+          <BlogCard>
+            {/* キャッチ画像 */}
+            {
+              heroImage && (
+                <div class="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 h-40 sm:h-52 lg:h-64">
+                  <img
+                    src={heroImage.src}
+                    alt={heroImage.alt ?? title}
+                    loading="lazy"
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+              )
+            }
+
+            {/* 記事ヘッダー */}
+            <BlogHeader
+              title={title}
+              description={description}
+              pubDate={pubDate}
+              updatedDate={updatedDate}
+              tags={tags}
+            />
+
+            {/* 本文 */}
+            <BlogContent>
+              <slot />
+            </BlogContent>
+          </BlogCard>
+
+          {/* 関連記事はカードの下に並べる */}
+          {
+            relatedPosts.length > 0 && (
+              <div class="mt-6">
+                <BlogRelatedPosts relatedPosts={relatedPosts} />
+              </div>
+            )
+          }
+        </div>
+
+        {
+          /*
+          右カラム: 目次（lg 以上の幅で横に表示）
+        */
+        }
+        <aside class="hidden w-64 shrink-0 lg:block">
+          <div class="sticky top-20">
+            <BlogToc toc={toc} />
+          </div>
+        </aside>
+      </div>
+
+      <Footer />
+
+      {/* scrollspy スクリプト */}
+      <script>
+        if (typeof window !== "undefined") {
+          window.addEventListener("DOMContentLoaded", () => {
+            const headingSelector =
+              ".prose h1[id], .prose h2[id], .prose h3[id], .prose h4[id]";
+            const headings = Array.from(
+              document.querySelectorAll(headingSelector),
+            );
+
+            if (!headings.length) {
+              console.debug("[TOC] no headings found");
+              return;
+            }
+
+            const tocLinks = new Map();
+            document.querySelectorAll("a[data-toc-target]").forEach((el) => {
+              const slug = el.getAttribute("data-toc-target");
+              if (slug) {
+                tocLinks.set(slug, el);
+              }
+            });
+
+            if (!tocLinks.size) {
+              console.debug("[TOC] no toc links found");
+              return;
+            }
+
+            let activeId = null;
+
+            const clearActive = () => {
+              tocLinks.forEach((link) => {
+                link.classList.remove(
+                  "bg-slate-900/5",
+                  "text-slate-900",
+                  "font-semibold",
+                );
+              });
+            };
+
+            const setActive = (id) => {
+              if (id === activeId) return;
+              activeId = id;
+              clearActive();
+              const link = tocLinks.get(id);
+              if (link) {
+                link.classList.add(
+                  "bg-slate-900/5",
+                  "text-slate-900",
+                  "font-semibold",
+                );
+              }
+            };
+
+            const observer = new IntersectionObserver(
+              (entries) => {
+                const visible = entries
+                  .filter((e) => e.isIntersecting)
+                  .sort((a, b) => {
+                    const at = /** @type {HTMLElement} */ (a.target).offsetTop;
+                    const bt = /** @type {HTMLElement} */ (b.target).offsetTop;
+                    return at - bt;
+                  });
+
+                if (!visible.length) return;
+                const id = visible[0].target.id;
+                if (id) setActive(id);
+              },
+              {
+                rootMargin: "0px 0px -60% 0px",
+                threshold: 0.1,
+              },
+            );
+
+            headings.forEach((h) => observer.observe(h));
+
+            const first = headings[0];
+            if (first && first.id) {
+              setActive(first.id);
+            }
+
+            window.addEventListener("beforeunload", () => {
+              observer.disconnect();
+            });
+          });
+        }
+      </script>
+    </main>
+  </body>
+</html>

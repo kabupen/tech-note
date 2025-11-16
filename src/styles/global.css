@@ -1,0 +1,33 @@
+/* ---------------------------------------
+ * ライブラリ
+ * ------------------------------------ */
+/* 数式（KaTeX） */
+@import "katex/dist/katex.min.css";
+
+/* Tailwind v4 本体 + プラグイン */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Tailwind テーマ（フォントなど） */
+@theme {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* 必要ならブランドカラーもここに追加
+     --color-accent: #2337ff;  など */
+}
+
+/* ---------------------------------------
+ * HTML / Body の超ベースだけ
+ * （見た目は Tailwind に任せる）
+ * ------------------------------------ */
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f7f8fc; /* サイト全体のベース背景だけ決める */
+}

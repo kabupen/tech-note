@@ -1,118 +1,62 @@
-
-# 執筆手順
-
-1. 記事の新規作成
-   1. content/post 以下に UUID 名のディレクトリ、index.md が作成される
+# Astro Starter Kit: Blog
 
 ```sh
-python newpost.py
+npm create astro@latest -- --template blog
 ```
 
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
+Features:
 
-### ディレクトリ
+- ✅ Minimal styling (make it your own!)
+- ✅ 100/100 Lighthouse performance
+- ✅ SEO-friendly with canonical URLs and OpenGraph data
+- ✅ Sitemap support
+- ✅ RSS Feed support
+- ✅ Markdown & MDX support
 
-https://gohugo.io/getting-started/directory-structure/
+## 🚀 Project Structure
 
-- archetypes
-  - 記事のテンプレートを作ることができる
-- assets
-  - Hugo Pipes で処理するファイルを格納する
-- content
-  - 記事を置くディレクトリ
-- data
-  - サイトから参照するデータを置く
-- layouts
-  - thmemes を自分で編集するためのディレクトリ
-- static
-  - 画像、CSS などの全ての静的ファイルを格納するディレクトリ、記事に貼る画像もここに置く
-  - ビルド時に public ディレクトリへコピーされる
-- public
-  - ビルド時に生成される
-- resources
-  - ビルド時に生成されるキャシュ
+Inside of your Astro project, you'll see the following folders and files:
 
-### hugo
-
-```sh
-$ hugo version        
-hugo v0.122.0-b9a03bd59d5f71a529acb3e33f995e0ef332b3aa+extended darwin/arm64 BuildDate=2024-01-26T15:54:24Z VendorInfo=brew
-```
-
-### 設定ファイル
-
-v0.109.0 以降は `hugo.toml` をルートディレクトリに配置する。
-
-
-### Github Actions
-
-- CI/CD の設定
-
-
-# Hugo
-
-
-## シンタックスハイライト
-
-- hightlight.css の作成
-
-```
-hugo gen chromastyles --style=monokai > static/highlight.css
-```
-
-
-
-## ディレクトリ構造
-
-
-```
-sample/
-├── archetypes/
-│   └── default.md
-├── assets/
-├── content/
-├── data/
-├── layouts/
+```text
 ├── public/
-├── static/
-├── themes/
-└── config.toml
+├── src/
+│   ├── components/
+│   ├── content/
+│   ├── layouts/
+│   └── pages/
+├── astro.config.mjs
+├── README.md
+├── package.json
+└── tsconfig.json
 ```
 
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
-- archetypes: markdown のテンプレートを保存する
-- assets
-- content
-  - webサイトのすべての記事を置く
-- data
-  - サイトの全ページから参照したいデータを格納
-- layouts
-  - themes ディレクトリのテーマを修正する、追加機能を実装するときに使用
-- static
-  - 画像、CSS、JavaScript などの静的ファイルを格納
-  - 記事に画像を貼る場合もここに格納する
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
 
-## 設定ファイル
+The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
 
-- v0.109.0 までは config.toml を使用していたが、新しいバージョンでは hugo.toml を利用のこと
+Any static assets, like images, can be placed in the `public/` directory.
 
+## 🧞 Commands
 
-## layouts
+All commands are run from the root of the project, from a terminal:
 
-- 自作の html ヘッダーを読み込むことができる
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `npm install`             | Installs dependencies                            |
+| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| `npm run build`           | Build your production site to `./dist/`          |
+| `npm run preview`         | Preview your build locally, before deploying     |
+| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## 👀 Want to learn more?
 
-### hugo-bearblog
+Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
 
-- layouts/partials/custom_head.html を配置
-  - ここに追加したい html を記述すると全ページのヘッダーに読み込まれる
-  - ex. Katex の設定
+## Credit
 
-
-# 各パーツ
-
-## menu
-
-- layouts/partials/nav.html で定義
-  - content 以下に <directory>/index.md の構造であれば自動でメニューに表示されるかも
-  - hugo.toml で main 以外を定義している
+This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).

@@ -1,0 +1,40 @@
+---
+import FormattedDate from "../FormattedDate.astro";
+
+type RelatedPost = {
+  url: string;
+  title: string;
+  pubDate?: string | Date;
+};
+
+type Props = {
+  relatedPosts: RelatedPost[];
+};
+
+const { relatedPosts } = Astro.props as Props;
+---
+
+{
+  relatedPosts.length > 0 && (
+    <section class="rounded-2xl border border-slate-200 bg-slate-50/90 p-3.5 text-[12px] shadow-sm backdrop-blur">
+      <h2 class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        関連記事
+      </h2>
+      <div class="mt-2 space-y-2.5">
+        {relatedPosts.map((post) => (
+          <a
+            href={post.url}
+            class="block rounded-lg border border-slate-100 bg-white px-2.5 py-2 text-[12px] transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            <p class="line-clamp-2 font-medium text-slate-800">{post.title}</p>
+            {post.pubDate && (
+              <p class="mt-1 text-[11px] text-slate-500">
+                <FormattedDate date={post.pubDate} />
+              </p>
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}

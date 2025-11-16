@@ -1,0 +1,45 @@
+---
+type TocItem = {
+  depth: number;
+  slug: string;
+  text: string;
+};
+
+type Props = {
+  toc: TocItem[];
+};
+
+const { toc } = Astro.props as Props;
+---
+
+{
+  toc.length > 0 && (
+    <section class="text-[12px]">
+      <h2 class="mb-1 text-[11px] font-semibold tracking-wide text-slate-500">
+        目次
+      </h2>
+      <nav class="mt-1 leading-relaxed">
+        <ul class="space-y-1">
+          {toc.map((item) => (
+            <li
+              class:list={[
+                "truncate",
+                item.depth === 2 && "pl-0",
+                item.depth === 3 && "pl-3 text-slate-600",
+                item.depth >= 4 && "pl-5 text-[11px] text-slate-500",
+              ]}
+            >
+              <a
+                href={`#${item.slug}`}
+                data-toc-target={item.slug}
+                class="inline-block rounded px-1 py-0.5 text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+              >
+                {item.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </section>
+  )
+}

@@ -1,0 +1,32 @@
+---
+const today = new Date();
+---
+
+<footer>
+	&copy; {today.getFullYear()} Copyright kabupen All rights reserved.
+</footer>
+
+<style>
+	footer {
+		text-align: center;
+		padding: 0.5rem 0 0.75rem; /* ← 高さ（上下の余白）を小さく */
+		font-size: 0.8rem; /* ← 少し小さめにするとコンパクトに見える */
+		color: rgba(var(--gray), 0.7); /* ← 本文より薄いグレーに */
+	}
+
+	.social-links {
+		display: flex;
+		justify-content: center;
+		gap: 0.75em; /* ちょっとだけ狭める */
+		margin-top: 0.3em; /* 上の余白を削って高さを詰める */
+	}
+
+	.social-links a {
+		text-decoration: none;
+		color: inherit; /* ← footer の薄い色をそのまま継承 */
+	}
+
+	.social-links a:hover {
+		color: rgb(var(--gray-dark)); /* ホバー時だけ少し濃く */
+	}
+</style>

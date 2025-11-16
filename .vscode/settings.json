@@ -1,0 +1,25 @@
+{
+  // 全体で保存時にフォーマット
+  "editor.formatOnSave": true,
+
+  // デフォルトは Prettier（お好みで）
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Astro ファイルは Astro 拡張のフォーマッタを使う
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+
+  // ついでに…
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}
