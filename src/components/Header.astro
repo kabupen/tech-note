@@ -1,6 +1,7 @@
 ---
 // src/components/Header.astro
 import { SITE_TITLE } from "@/consts";
+import SearchBox from "@/components/SearchBox.astro";
 
 type NavLink = {
 	href: string;
@@ -10,6 +11,7 @@ type NavLink = {
 const navLinks: NavLink[] = [
 	{ href: "/", label: "Home" },
 	{ href: "/blog", label: "Blog" },
+	{ href: "/devs", label: "Devs" },
 	{ href: "/about", label: "About" },
 ];
 
@@ -65,6 +67,7 @@ const currentPath = Astro.url.pathname;
 
 			{/* 右側: SNS リンク（画面右寄り） */}
 			<div class="flex items-center gap-3 text-xs">
+				<SearchBox />
 				<a
 					href="https://github.com/kabupen"
 					target="_blank"

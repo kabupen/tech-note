@@ -1,0 +1,23 @@
+---
+import Layout from "@/layouts/SimplePage.astro";
+import AboutHeroImage from "@/assets/blog-placeholder-about.jpg"; // 適当な画像に差し替え
+---
+
+<Layout
+  title="iOS タイマーアプリ"
+  description="個人開発の iOS タイマーアプリの紹介"
+  pubDate={new Date("2025/11/16")}
+  heroImage={AboutHeroImage}
+>
+  <p>ここに iOS タイマーアプリの説明を書きます。</p>
+  <ul class="mt-4 space-y-2">
+    <li>
+      <a
+        href="/devs/ios-app/task-tracker/privacy-policy"
+        class="text-sky-600 hover:underline"
+      >
+        プライバシーポリシー
+      </a>
+    </li>
+  </ul>
+</Layout>

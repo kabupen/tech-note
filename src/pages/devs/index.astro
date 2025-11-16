@@ -1,0 +1,22 @@
+---
+import AboutHeroImage from "@/assets/blog-placeholder-about.jpg";
+import Layout from "@/layouts/SimplePage.astro";
+---
+
+<Layout
+	title="個人開発ページ"
+	description=""
+	pubDate={new Date("2025/11/15")}
+	heroImage={AboutHeroImage}
+>
+	<h1>iOSアプリ</h1>
+	趣味でいくつか iOS アプリを作成してみています。あるものないもの作るのが難しい...。
+
+	<ul class="mt-4 space-y-2">
+		<li>
+			<a href="/devs/ios-app/task-tracker" class="text-sky-600 hover:underline">
+				Task Tracker
+			</a>
+		</li>
+	</ul>
+</Layout>

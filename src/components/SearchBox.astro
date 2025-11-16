@@ -1,0 +1,128 @@
+---
+
+---
+
+<div class="relative hidden sm:block">
+  <input
+    id="site-search-input"
+    type="search"
+    placeholder="ページ内を検索"
+    class="w-86 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs text-slate-900 outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 sm:w-72 lg:w-80"
+  />
+  <div
+    id="site-search-results"
+    class="absolute right-0 mt-1 hidden max-h-80 w-80 overflow-auto rounded-lg border border-slate-200 bg-white text-xs shadow-lg"
+  >
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("site-search-input");
+    const resultsEl = document.getElementById("site-search-results");
+
+    /** @type {{slug:string,title:string,description:string,body:string}[]} */
+    let index = [];
+    let loaded = false;
+
+    async function loadIndex() {
+      if (loaded) return;
+      try {
+        const res = await fetch("/search.json");
+        if (!res.ok) return;
+        index = await res.json();
+        loaded = true;
+      } catch (e) {
+        console.error("Failed to load search index", e);
+      }
+    }
+
+    function clearResults() {
+      if (!resultsEl) return;
+      resultsEl.innerHTML = "";
+      resultsEl.classList.add("hidden");
+    }
+
+    function renderResults(hits) {
+      if (!resultsEl) return;
+      if (!hits.length) {
+        clearResults();
+        return;
+      }
+
+      resultsEl.classList.remove("hidden");
+      resultsEl.innerHTML = hits
+        .map(
+          (post) => `
+        <a
+          href="${post.url}/"
+          class="block border-b border-slate-100 px-3 py-2 last:border-b-0 hover:bg-slate-50"
+        >
+          <div class="font-semibold text-slate-900">
+            ${post.title}
+          </div>
+          ${
+            post.description
+              ? `<div class="mt-0.5 text-[11px] text-slate-500">
+                   ${post.description}
+                 </div>`
+              : ""
+          }
+        </a>
+      `,
+        )
+        .join("");
+    }
+
+    input?.addEventListener("focus", () => {
+      // 初回フォーカスでインデックス読み込み開始
+      loadIndex();
+    });
+
+    input?.addEventListener("input", async (event) => {
+      const target = event.target;
+      const q = target.value.trim().toLowerCase();
+
+      if (!q) {
+        clearResults();
+        return;
+      }
+
+      await loadIndex();
+      if (!index.length) return;
+
+      const hits = index
+        .filter((post) => {
+          const haystack = (
+            post.title +
+            " " +
+            post.description +
+            " " +
+            post.body
+          ).toLowerCase();
+          return haystack.includes(q);
+        })
+        .slice(0, 10); // 上位10件だけ表示
+
+      renderResults(hits);
+    });
+
+    // 外側クリックで閉じる
+    document.addEventListener("click", (event) => {
+      if (!input || !resultsEl) return;
+      if (event.target === input || resultsEl.contains(event.target)) {
+        return;
+      }
+      clearResults();
+    });
+
+    // Esc でクリア
+    input?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        input.value = "";
+        clearResults();
+        input.blur();
+      }
+    });
+  });
+</script>
