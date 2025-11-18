@@ -2,7 +2,7 @@
 title: "変数変換"
 pubDate: 2025-07-06T11:26:58+09:00
 heroImage: "@/assets/blog-placeholder-2.jpg"
-tags: ["統計"]
+categories: ["統計"]
 description: "確率・統計における変数変換についてまとめています。"
 ---
 

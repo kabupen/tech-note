@@ -4,8 +4,28 @@
 // 必要なら Props でバリアントを受けてもよいが、今はシンプルに slot だけ。
 ---
 
-<div
-  class="prose prose-slate prose-sm max-w-none prose-headings:scroll-mt-24 prose-h2:mt-8 prose-h3:mt-6 prose-img:rounded-lg prose-pre:bg-slate-900/90 prose-pre:text-slate-50"
+<article
+  class="prose prose-slate max-w-none
+    prose-sm sm:prose-base
+    prose-headings:scroll-mt-24
+    /* 見出しまわり */
+    prose-h1:text-2xl sm:prose-h1:text-2xs
+    prose-h1:font-bold
+    prose-h2:text-xl sm:prose-h2:text-2xl
+    prose-h2:mt-8
+    prose-h3:text-lg
+    prose-h3:mt-6
+    /* 本文の文字サイズ */
+    prose-p:text-[13px] sm:prose-p:text-[14px]
+    prose-li:text-[13px] sm:prose-li:text-[14px]
+    prose-p:text-slate-700
+    /* 行間など（必要なら） */
+    prose-p:leading-relaxed
+    prose-li:leading-relaxed
+    /* 画像・コードブロック */
+    prose-img:rounded-xl
+    prose-pre:bg-slate-900/90
+    prose-pre:text-slate-50"
 >
   <slot />
-</div>
+</article>

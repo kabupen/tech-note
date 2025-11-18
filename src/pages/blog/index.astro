@@ -12,6 +12,45 @@ import { getBlogSlugFromId } from "@/utils/blogSlug";
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
+
+// ---- サイドバー用データ集計 ----
+const categoryCounts = new Map<string, number>();
+const tagCounts = new Map<string, number>();
+const archiveCounts = new Map<string, number>();
+
+for (const post of posts) {
+  const data: any = post.data;
+
+  const categories = (data.categories ?? []) as string[];
+  for (const category of categories) {
+    categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
+  }
+
+  const tags = (data.tags ?? []) as string[];
+  for (const tag of tags) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+
+  const d: Date = data.pubDate;
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const ymKey = `${year}-${String(month).padStart(2, "0")}`;
+  archiveCounts.set(ymKey, (archiveCounts.get(ymKey) ?? 0) + 1);
+}
+
+const categories = Array.from(categoryCounts, ([name, count]) => ({
+  name,
+  count,
+})).sort((a, b) => a.name.localeCompare(b.name, "ja"));
+
+const tags = Array.from(tagCounts, ([name, count]) => ({ name, count })).sort(
+  (a, b) => b.count - a.count
+);
+
+const archives = Array.from(archiveCounts, ([key, count]) => {
+  const [year, month] = key.split("-");
+  return { key, year, month, count };
+}).sort((a, b) => b.key.localeCompare(a.key));
 ---
 
 <!doctype html>
@@ -25,7 +64,24 @@ const posts = (await getCollection("blog")).sort(
         padding: 0 1rem 2.5rem;
       }
 
-      /* 1 列 n 行のカードリスト */
+      /* 2 カラムレイアウト：左コンテンツ / 右サイドバー */
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2.5fr) minmax(220px, 1fr);
+        gap: 2rem;
+        align-items: flex-start;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .sidebar {
+        min-width: 0;
+        font-size: 0.9rem;
+      }
+
+      /* 1 列 n 行のカードリスト（左側） */
       .post-list {
         list-style-type: none;
         margin: 0;
@@ -77,6 +133,7 @@ const posts = (await getCollection("blog")).sort(
         color: rgb(var(--black));
         line-height: 1.4;
         font-size: 1.15rem;
+        font-weight: 600;
       }
 
       .date {
@@ -85,10 +142,10 @@ const posts = (await getCollection("blog")).sort(
         font-size: 0.85rem;
       }
 
-      /* タグ一覧 */
+      /* カード内タグ */
       .tags {
         display: flex;
-        flex-direction: row; /* ★ これで必ず横方向 */
+        flex-direction: row;
         flex-wrap: wrap;
         gap: 0.35rem;
         margin: 0 0 0.35rem;
@@ -99,7 +156,7 @@ const posts = (await getCollection("blog")).sort(
       .tag {
         padding: 0.1rem 0.5rem;
         border-radius: 9px;
-        font-size: 0.78rem;
+        font-size: 0.67rem;
         background: rgba(0, 0, 0, 0.03);
         border: 1px solid rgba(0, 0, 0, 0.08);
         color: rgba(0, 0, 0, 0.7);
@@ -109,8 +166,84 @@ const posts = (await getCollection("blog")).sort(
       .excerpt {
         margin: 0;
         color: rgba(0, 0, 0, 0.7);
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         line-height: 1.6;
+      }
+
+      /* サイドバーのウィジェット */
+      .widget {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        /* border-radius: 12px;
+        background: #fafafa; 
+        border: 1px solid rgba(0, 0, 0, 0.04); */
+      }
+
+      .widget-title {
+        margin: 0 0 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: rgb(var(--black));
+      }
+
+      .widget-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .widget-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0.2rem 0;
+      }
+
+      .widget-item-label {
+        color: rgba(0, 0, 0, 0.8);
+      }
+
+      .widget-item-count {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 0.8rem;
+        margin-left: 0.25rem;
+      }
+
+      .widget-tags li {
+        justify-content: flex-start;
+        gap: 0.35rem;
+      }
+
+      .tag-pill {
+        padding: 0.1rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        color: rgba(0, 0, 0, 0.75);
+        white-space: nowrap;
+      }
+
+      .archive-link {
+        text-decoration: none;
+        color: rgba(0, 0, 0, 0.8);
+        font-size: 0.9rem;
+      }
+
+      .archive-link:hover {
+        color: rgb(var(--accent));
+      }
+
+      .widget-empty {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 0.85rem;
+      }
+
+      /* モバイルでは 1 カラムに落とす */
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
 
       /* モバイルではカード内も縦並びにする */
@@ -135,49 +268,125 @@ const posts = (await getCollection("blog")).sort(
   <body>
     <Header />
     <main>
-      <section>
-        <ul class="post-list">
-          {
-            posts.map((post) => (
-              <li>
-                <a
-                  href={`/blog/${getBlogSlugFromId(post.id)}/`}
-                  class="post-card"
-                >
-                  {post.data.heroImage && (
-                    <Image
-                      width={720}
-                      height={360}
-                      src={post.data.heroImage}
-                      alt=""
-                      class="thumb"
-                    />
-                  )}
-                  <div class="post-body">
-                    <h4 class="title">{post.data.title}</h4>
-                    <p class="date">
-                      <FormattedDate date={post.data.pubDate} />
-                    </p>
-
-                    {/* tags があればバッジ表示 */}
-                    {post.data.tags && post.data.tags.length > 0 && (
-                      <ul class="tags">
-                        {post.data.tags.map((tag) => (
-                          <li class="tag"># {tag}</li>
-                        ))}
-                      </ul>
+      <div class="layout">
+        <section class="content">
+          <ul class="post-list">
+            {
+              posts.map((post) => (
+                <li>
+                  <a
+                    href={`/blog/${getBlogSlugFromId(post.id)}/`}
+                    class="post-card"
+                  >
+                    {post.data.heroImage && (
+                      <Image
+                        width={720}
+                        height={360}
+                        src={post.data.heroImage}
+                        alt=""
+                        class="thumb"
+                      />
                     )}
+                    <div class="post-body">
+                      <p class="date">
+                        <FormattedDate date={post.data.pubDate} />
+                      </p>
 
-                    {post.data.description && (
-                      <p class="excerpt">{post.data.description}</p>
-                    )}
-                  </div>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </section>
+                      <h4 class="title">{post.data.title}</h4>
+
+                      {post.data.description && (
+                        <p class="excerpt">{post.data.description}</p>
+                      )}
+
+                      {(post.data.categories?.length ||
+                        post.data.tags?.length) && (
+                        <ul class="tags">
+                          {/* カテゴリ */}
+                          {post.data.categories?.map((category) => (
+                            <li class="tag tag-category">
+                              <iconify-icon icon="heroicons-outline:folder" />
+                              {category}
+                            </li>
+                          ))}
+
+                          {/* タグ */}
+                          {post.data.tags?.map((tag) => (
+                            <li class="tag"># {tag}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <aside class="sidebar">
+          <div class="widget">
+            <h2 class="widget-title">カテゴリー</h2>
+            <ul class="widget-list">
+              {
+                categories.length === 0 && (
+                  <li class="widget-empty">カテゴリはまだありません。</li>
+                )
+              }
+              {
+                categories.map((cat) => (
+                  <li>
+                    <span class="widget-item-label">{cat.name}</span>
+                    <span class="widget-item-count">({cat.count})</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="widget">
+            <h2 class="widget-title">タグ</h2>
+            <ul class="widget-list widget-tags">
+              {
+                tags.length === 0 && (
+                  <li class="widget-empty">タグはまだありません。</li>
+                )
+              }
+              {
+                tags.map((tag) => (
+                  <li>
+                    <span class="tag-pill"># {tag.name}</span>
+                    <span class="widget-item-count">({tag.count})</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="widget">
+            <h2 class="widget-title">月別アーカイブ</h2>
+            <ul class="widget-list">
+              {
+                archives.length === 0 && (
+                  <li class="widget-empty">アーカイブはまだありません。</li>
+                )
+              }
+              {
+                archives.map((arc) => (
+                  <li>
+                    <a
+                      href={`/blog/archive/${arc.year}/${arc.month}/`}
+                      class="archive-link"
+                    >
+                      {arc.year}年{arc.month}月
+                      <span class="widget-item-count">({arc.count})</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </aside>
+      </div>
     </main>
     <Footer />
   </body>

@@ -4,87 +4,87 @@ import { SITE_TITLE } from "@/consts";
 import SearchBox from "@/components/SearchBox.astro";
 
 type NavLink = {
-	href: string;
-	label: string;
+  href: string;
+  label: string;
 };
 
 const navLinks: NavLink[] = [
-	{ href: "/", label: "Home" },
-	{ href: "/blog", label: "Blog" },
-	{ href: "/devs", label: "Devs" },
-	{ href: "/about", label: "About" },
+  { href: "/", label: "Home" },
+  { href: "/blog", label: "Blog" },
+  { href: "/devs", label: "Devs" },
+  { href: "/about", label: "About" },
 ];
 
 const currentPath = Astro.url.pathname;
 ---
 
 <header
-	class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-black/5"
+  class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-black/5"
 >
-	{/* 中央寄せコンテナ（左右にしっかり余白） */}
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-6">
-		<nav
-			class="flex h-16 items-center justify-between text-sm"
-			aria-label="Main navigation"
-		>
-			{/* 左側: サイトタイトル + ナビリンク */}
-			<div class="flex items-center gap-8">
-				<a
-					href="/"
-					class="text-base font-semibold tracking-tight text-[var(--black)] no-underline hover:opacity-80"
-				>
-					{SITE_TITLE}
-				</a>
+  {/* 中央寄せコンテナ（左右にしっかり余白） */}
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-6">
+    <nav
+      class="flex h-16 items-center justify-between text-sm"
+      aria-label="Main navigation"
+    >
+      {/* 左側: サイトタイトル + ナビリンク */}
+      <div class="flex items-center gap-8">
+        <a
+          href="/"
+          class="text-base font-semibold tracking-tight text-[var(--black)] no-underline hover:opacity-80"
+        >
+          {SITE_TITLE}
+        </a>
 
-				<div class="flex items-center gap-2 text-xs sm:text-sm">
-					{
-						navLinks.map((link) => {
-							const isActive =
-								link.href === "/"
-									? currentPath === link.href
-									: currentPath.startsWith(link.href);
+        <div class="flex items-center gap-2 text-xs sm:text-sm">
+          {
+            navLinks.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? currentPath === link.href
+                  : currentPath.startsWith(link.href);
 
-							return (
-								<a
-									href={link.href}
-									key={link.href}
-									class:list={{
-										// ベーススタイル
-										"px-2 py-1 border-b-2 border-b-transparent no-underline text-[var(--black)]/80 transition-colors": true,
-										// ホバー
-										"hover:text-[var(--black)] hover:border-b-[var(--accent)]": true,
-										// アクティブページ
-										"border-b-[var(--accent)] text-[var(--black)]": isActive,
-									}}
-								>
-									{link.label}
-								</a>
-							);
-						})
-					}
-				</div>
-			</div>
+              return (
+                <a
+                  href={link.href}
+                  key={link.href}
+                  class:list={{
+                    // ベーススタイル
+                    "px-2 py-1 border-b-2 border-b-transparent no-underline text-[var(--black)]/80 transition-colors": true,
+                    // ホバー
+                    "hover:text-[var(--black)] hover:border-b-[var(--accent)]": true,
+                    // アクティブページ
+                    "border-b-[var(--accent)] text-[var(--black)]": isActive,
+                  }}
+                >
+                  {link.label}
+                </a>
+              );
+            })
+          }
+        </div>
+      </div>
 
-			{/* 右側: SNS リンク（画面右寄り） */}
-			<div class="flex items-center gap-3 text-xs">
-				<SearchBox />
-				<a
-					href="https://github.com/kabupen"
-					target="_blank"
-					rel="noreferrer"
-					class="inline-flex items-center text-[var(--black)] no-underline opacity-80 transition hover:opacity-100"
-				>
-					GitHub
-				</a>
-				<a
-					href="https://x.com/your-id"
-					target="_blank"
-					rel="noreferrer"
-					class="inline-flex items-center text-[var(--black)] no-underline opacity-80 transition hover:opacity-100"
-				>
-					X
-				</a>
-			</div>
-		</nav>
-	</div>
+      {/* 右側: SNS リンク（画面右寄り） */}
+      <div class="flex items-center gap-3 text-xs">
+        <SearchBox />
+        <a
+          href="https://github.com/kabupen"
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center text-[var(--black)] no-underline opacity-80 transition hover:opacity-100"
+        >
+          GitHub
+        </a>
+        <a
+          href="https://x.com/kabupen"
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center text-[var(--black)] no-underline opacity-80 transition hover:opacity-100"
+        >
+          X
+        </a>
+      </div>
+    </nav>
+  </div>
 </header>

@@ -45,6 +45,7 @@ const {
   updatedDate,
   heroImage,
   tags = [],
+  categories = [],
 } = frontmatter;
 
 const toc: TocItem[] =
@@ -98,6 +99,7 @@ const toc: TocItem[] =
               pubDate={pubDate}
               updatedDate={updatedDate}
               tags={tags}
+              categories={categories}
             />
 
             {/* 本文 */}
@@ -137,7 +139,7 @@ const toc: TocItem[] =
             const headingSelector =
               ".prose h1[id], .prose h2[id], .prose h3[id], .prose h4[id]";
             const headings = Array.from(
-              document.querySelectorAll(headingSelector),
+              document.querySelectorAll(headingSelector)
             );
 
             if (!headings.length) {
@@ -165,7 +167,7 @@ const toc: TocItem[] =
                 link.classList.remove(
                   "bg-slate-900/5",
                   "text-slate-900",
-                  "font-semibold",
+                  "font-semibold"
                 );
               });
             };
@@ -179,7 +181,7 @@ const toc: TocItem[] =
                 link.classList.add(
                   "bg-slate-900/5",
                   "text-slate-900",
-                  "font-semibold",
+                  "font-semibold"
                 );
               }
             };
@@ -201,7 +203,7 @@ const toc: TocItem[] =
               {
                 rootMargin: "0px 0px -60% 0px",
                 threshold: 0.1,
-              },
+              }
             );
 
             headings.forEach((h) => observer.observe(h));
