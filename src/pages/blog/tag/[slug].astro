@@ -1,0 +1,236 @@
+---
+// src/pages/blog/tag/[slug].astro
+
+import { getCollection } from "astro:content";
+
+import BaseHead from "@/components/BaseHead.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import { getBlogSlugFromId } from "@/utils/blogSlug";
+import { SITE_TITLE } from "@/consts";
+
+// ★ この動的ルート用のパスを全部列挙
+export async function getStaticPaths() {
+  // draft を除きたいならフィルタ
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+
+  const tagSet = new Set<string>();
+
+  for (const post of posts) {
+    const tags = (post.data.tags ?? []) as string[];
+    for (const tag of tags) {
+      if (tag) tagSet.add(tag);
+    }
+  }
+
+  // /blog/tag/[slug]/ に対応するパスを返す
+  return Array.from(tagSet).map((tag) => ({
+    params: { slug: tag }, // encode しない
+  }));
+}
+
+// パラメータ取得
+const { slug } = Astro.params;
+
+// タグ名（URL デコード）
+const tagName = slug ? decodeURIComponent(slug) : "";
+
+if (!tagName) {
+  Astro.response.status = 404;
+}
+
+// 全記事取得（ドラフト除外）
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+
+// 指定タグでフィルタ
+const posts = allPosts
+  .filter((post) => (post.data.tags ?? []).includes(tagName))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const pageTitle = `「${tagName}」タグの記事一覧`;
+---
+
+<!doctype html>
+<html lang="ja-JP">
+  <head>
+    <BaseHead title={`${pageTitle} | ${SITE_TITLE}`} description={pageTitle} />
+    <style>
+      main {
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem 2.5rem;
+      }
+
+      .page-title {
+        margin: 0 0 1.5rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+
+      .post-list {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .post-card {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        text-decoration: none;
+        transition:
+          box-shadow 0.2s ease,
+          transform 0.2s ease,
+          border-color 0.2s ease;
+      }
+
+      .post-card:hover {
+        box-shadow: var(--box-shadow);
+        border-color: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .thumb {
+        flex-shrink: 0;
+        width: 180px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .post-body {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .title {
+        margin: 0;
+        color: rgb(var(--black));
+        line-height: 1.4;
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+
+      .date {
+        margin: 0 0 0.25rem;
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 0.85rem;
+      }
+
+      .excerpt {
+        margin: 0.25rem 0 0.4rem;
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .tag {
+        padding: 0.1rem 0.5rem;
+        border-radius: 9px;
+        font-size: 0.67rem;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        color: rgba(0, 0, 0, 0.7);
+        white-space: nowrap;
+      }
+
+      .empty-message {
+        margin-top: 1rem;
+        color: rgba(0, 0, 0, 0.55);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          margin: 1.5rem auto;
+          padding: 0 0.75rem 2rem;
+        }
+
+        .post-card {
+          flex-direction: column;
+          padding: 0.75rem;
+        }
+
+        .thumb {
+          width: 100%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <h1 class="page-title">{pageTitle}</h1>
+
+      {
+        posts.length === 0 ? (
+          <p class="empty-message">このタグにはまだ記事がありません。</p>
+        ) : (
+          <ul class="post-list">
+            {posts.map((post) => (
+              <li>
+                <a
+                  href={`/blog/${getBlogSlugFromId(post.id)}/`}
+                  class="post-card"
+                >
+                  {post.data.heroImage && (
+                    <img
+                      src={post.data.heroImage.src ?? post.data.heroImage}
+                      alt=""
+                      class="thumb"
+                      loading="lazy"
+                    />
+                  )}
+
+                  <div class="post-body">
+                    <p class="date">
+                      <FormattedDate date={post.data.pubDate} />
+                    </p>
+                    <h2 class="title">{post.data.title}</h2>
+
+                    {post.data.description && (
+                      <p class="excerpt">{post.data.description}</p>
+                    )}
+
+                    {(post.data.categories?.length ||
+                      post.data.tags?.length) && (
+                      <ul class="tags">
+                        {post.data.categories?.map((category) => (
+                          <li class="tag">
+                            <iconify-icon icon="heroicons-outline:folder" />
+                            {category}
+                          </li>
+                        ))}
+                        {post.data.tags?.map((tag) => (
+                          <li class="tag"># {tag}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </main>
+    <Footer />
+  </body>
+</html>

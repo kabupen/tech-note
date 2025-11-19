@@ -12,102 +12,102 @@ const allPosts = await getCollection("blog", ({ data }) => !data.draft);
 
 // 最新記事: pubDate 降順で上位 4 件
 const latestPosts = [...allPosts]
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 4);
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 4);
 
 // 人気記事: とりあえず slug のリストで管理
 const POPULAR_SLUGS = [
-	// "diffusion-basics",
-	// "hsi-intro",
+  // "diffusion-basics",
+  // "hsi-intro",
 ];
 
 const popularPosts: CollectionEntry<"blog">[] = POPULAR_SLUGS.map((slug) =>
-	allPosts.find((post) => post.slug === slug),
+  allPosts.find((post) => post.slug === slug)
 ).filter((p): p is CollectionEntry<"blog"> => Boolean(p));
 ---
 
 <!doctype html>
 <html lang="ja">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body
-		class="min-h-screen bg-slate-50 font-sans text-[13px] text-slate-900 antialiased sm:text-[14px]"
-	>
-		<Header />
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body
+    class="min-h-screen bg-slate-50 font-sans text-[13px] text-slate-900 antialiased sm:text-[14px]"
+  >
+    <Header />
 
-		{
-			/*
+    {
+      /*
       ★ Header.astro と同じコンテナ幅に統一
          mx-auto max-w-7xl px-4 sm:px-6 lg:px-6
     */
-		}
-		<main class="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-6 lg:pb-14">
-			<section class="mb-10">
-				<h1 class="text-2xl font-semibold tracking-tight">🧑‍🚀 kabupen</h1>
-				<p class="mt-2 text-slate-600">はじめまして〜</p>
-			</section>
+    }
+    <main class="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-6 lg:pb-14">
+      <section class="mb-10">
+        <h1 class="text-2xl font-semibold tracking-tight">🧑‍🚀 kabupen</h1>
+        <p class="mt-2 text-slate-600">はじめまして〜</p>
+      </section>
 
-			<section class="mb-10">
-				<div class="mb-4 flex items-baseline justify-between gap-4">
-					<h2 class="text-lg font-semibold">最新の記事</h2>
-					<a href="/blog" class="text-xs text-sky-600 hover:underline">
-						すべての記事
-					</a>
-				</div>
+      <section class="mb-10">
+        <div class="mb-4 flex items-baseline justify-between gap-4">
+          <h2 class="text-lg font-semibold">最新の記事</h2>
+          <a href="/blog" class="text-xs text-sky-600 hover:underline">
+            すべての記事
+          </a>
+        </div>
 
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{
-						latestPosts.map((post) => (
-							<article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
-								<a
-									href={`/blog/${post.slug}/`}
-									class="block no-underline text-inherit"
-								>
-									<h3 class="mb-1 text-sm font-semibold">{post.data.title}</h3>
-									<p class="mb-1 text-[11px] text-slate-400">
-										{post.data.pubDate.toLocaleDateString("ja-JP")}
-									</p>
-									<p class="text-xs text-slate-600">{post.data.description}</p>
-								</a>
-							</article>
-						))
-					}
-				</div>
-			</section>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {
+            latestPosts.map((post) => (
+              <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
+                <a
+                  href={`/blog/${post.slug}/`}
+                  class="block no-underline text-inherit"
+                >
+                  <h3 class="mb-1 text-sm font-semibold">{post.data.title}</h3>
+                  <p class="mb-1 text-[11px] text-slate-400">
+                    {post.data.pubDate.toLocaleDateString("ja-JP")}
+                  </p>
+                  <p class="text-xs text-slate-600">{post.data.description}</p>
+                </a>
+              </article>
+            ))
+          }
+        </div>
+      </section>
 
-			{
-				popularPosts.length > 0 && (
-					<section class="mb-10">
-						<div class="mb-4 flex items-baseline justify-between gap-4">
-							<h2 class="text-lg font-semibold">人気の記事</h2>
-						</div>
+      {
+        popularPosts.length > 0 && (
+          <section class="mb-10">
+            <div class="mb-4 flex items-baseline justify-between gap-4">
+              <h2 class="text-lg font-semibold">人気の記事</h2>
+            </div>
 
-						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-							{popularPosts.map((post) => (
-								<article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
-									<a
-										href={`/blog/${post.slug}/`}
-										class="block no-underline text-inherit"
-									>
-										<h3 class="mb-1 text-sm font-semibold">
-											{post.data.title}
-										</h3>
-										<p class="mb-1 text-[11px] text-slate-400">
-											{post.data.pubDate.toLocaleDateString("ja-JP")}
-										</p>
-										<p class="text-xs text-slate-600">
-											{post.data.description}
-										</p>
-									</a>
-								</article>
-							))}
-						</div>
-					</section>
-				)
-			}
-		</main>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularPosts.map((post) => (
+                <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
+                  <a
+                    href={`/blog/${post.slug}/`}
+                    class="block no-underline text-inherit"
+                  >
+                    <h3 class="mb-1 text-sm font-semibold">
+                      {post.data.title}
+                    </h3>
+                    <p class="mb-1 text-[11px] text-slate-400">
+                      {post.data.pubDate.toLocaleDateString("ja-JP")}
+                    </p>
+                    <p class="text-xs text-slate-600">
+                      {post.data.description}
+                    </p>
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </main>
 
-		<Footer />
-	</body>
+    <Footer />
+  </body>
 </html>

@@ -13,7 +13,9 @@ const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-// ---- サイドバー用データ集計 ----
+// ----------------------------
+// 集計処理
+// ----------------------------
 const categoryCounts = new Map<string, number>();
 const tagCounts = new Map<string, number>();
 const archiveCounts = new Map<string, number>();
@@ -21,36 +23,77 @@ const archiveCounts = new Map<string, number>();
 for (const post of posts) {
   const data: any = post.data;
 
+  // カテゴリ集計
   const categories = (data.categories ?? []) as string[];
   for (const category of categories) {
     categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
   }
 
+  // タグ
   const tags = (data.tags ?? []) as string[];
   for (const tag of tags) {
     tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
   }
 
+  // 時期別集計
   const d: Date = data.pubDate;
   const year = d.getFullYear();
   const month = d.getMonth() + 1;
   const ymKey = `${year}-${String(month).padStart(2, "0")}`;
   archiveCounts.set(ymKey, (archiveCounts.get(ymKey) ?? 0) + 1);
 }
-
 const categories = Array.from(categoryCounts, ([name, count]) => ({
   name,
   count,
+  slug: encodeURIComponent(name),
 })).sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
-const tags = Array.from(tagCounts, ([name, count]) => ({ name, count })).sort(
-  (a, b) => b.count - a.count
-);
+const tags = Array.from(tagCounts, ([name, count]) => ({
+  name,
+  count,
+  slug: encodeURIComponent(name),
+})).sort((a, b) => b.count - a.count);
 
-const archives = Array.from(archiveCounts, ([key, count]) => {
+// 年ごとにグルーピング
+type ArchiveMonth = {
+  month: string; // "01" ~ "12"
+  count: number;
+};
+
+type ArchiveYear = {
+  year: string; // "2025" など
+  total: number;
+  months: ArchiveMonth[];
+};
+
+const archiveYearMap = new Map<string, ArchiveYear>();
+
+for (const [key, count] of archiveCounts) {
   const [year, month] = key.split("-");
-  return { key, year, month, count };
-}).sort((a, b) => b.key.localeCompare(a.key));
+  const existing = archiveYearMap.get(year);
+
+  if (!existing) {
+    archiveYearMap.set(year, {
+      year,
+      total: count,
+      months: [{ month, count }],
+    });
+  } else {
+    existing.total += count;
+    existing.months.push({ month, count });
+  }
+}
+
+// 年で降順、月も降順（新しい月が上）
+const archives = Array.from(archiveYearMap.values())
+  .map((yearEntry) => ({
+    ...yearEntry,
+    months: yearEntry.months.sort((a, b) => b.month.localeCompare(a.month)),
+  }))
+  .sort((a, b) => b.year.localeCompare(a.year));
+
+// ★ 追加：今年（ビルド時点の年）
+const currentYear = new Date().getFullYear().toString();
 ---
 
 <!doctype html>
@@ -239,6 +282,64 @@ const archives = Array.from(archiveCounts, ([key, count]) => {
         font-size: 0.85rem;
       }
 
+      .archive-link {
+        text-decoration: none;
+        color: rgba(0, 0, 0, 0.8);
+        font-size: 0.9rem;
+      }
+
+      .archive-link:hover {
+        color: rgb(var(--accent));
+      }
+
+      .widget-empty {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 0.85rem;
+      }
+
+      /* ここから追加 */
+
+      .archive-years {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .archive-year {
+        margin-bottom: 0.4rem;
+      }
+
+      .archive-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: rgba(0, 0, 0, 0.85);
+      }
+
+      .archive-summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .archive-summary::before {
+        content: "▸";
+        display: inline-block;
+        margin-right: 0.4rem;
+        transition: transform 0.15s ease;
+        font-size: 0.7rem;
+      }
+
+      details[open] > .archive-summary::before {
+        transform: rotate(90deg);
+      }
+
+      .archive-month-list {
+        list-style: none;
+        margin: 0.3rem 0 0.1rem 1.1rem;
+        padding: 0;
+      }
+
       /* モバイルでは 1 カラムに落とす */
       @media (max-width: 900px) {
         .layout {
@@ -335,7 +436,12 @@ const archives = Array.from(archiveCounts, ([key, count]) => {
               {
                 categories.map((cat) => (
                   <li>
-                    <span class="widget-item-label">{cat.name}</span>
+                    <a
+                      href={`/blog/category/${cat.slug}/`}
+                      class="widget-item-label archive-link"
+                    >
+                      {cat.name}
+                    </a>
                     <span class="widget-item-count">({cat.count})</span>
                   </li>
                 ))
@@ -354,7 +460,9 @@ const archives = Array.from(archiveCounts, ([key, count]) => {
               {
                 tags.map((tag) => (
                   <li>
-                    <span class="tag-pill"># {tag.name}</span>
+                    <a href={`/blog/tag/${tag.slug}/`} class="tag-pill">
+                      # {tag.name}
+                    </a>
                     <span class="widget-item-count">({tag.count})</span>
                   </li>
                 ))
@@ -364,26 +472,44 @@ const archives = Array.from(archiveCounts, ([key, count]) => {
 
           <div class="widget">
             <h2 class="widget-title">月別アーカイブ</h2>
-            <ul class="widget-list">
-              {
-                archives.length === 0 && (
-                  <li class="widget-empty">アーカイブはまだありません。</li>
-                )
-              }
-              {
-                archives.map((arc) => (
-                  <li>
-                    <a
-                      href={`/blog/archive/${arc.year}/${arc.month}/`}
-                      class="archive-link"
-                    >
-                      {arc.year}年{arc.month}月
-                      <span class="widget-item-count">({arc.count})</span>
-                    </a>
-                  </li>
-                ))
-              }
-            </ul>
+
+            {
+              archives.length === 0 ? (
+                <p class="widget-empty">アーカイブはまだありません。</p>
+              ) : (
+                <ul class="widget-list archive-years">
+                  {archives.map((archiveYear) => (
+                    <li class="archive-year">
+                      {/* ★ 今年の年だけ open にする */}
+                      <details open={archiveYear.year === currentYear}>
+                        <summary class="archive-summary">
+                          <span>{archiveYear.year}年</span>
+                          <span class="widget-item-count">
+                            ({archiveYear.total})
+                          </span>
+                        </summary>
+
+                        <ul class="archive-month-list">
+                          {archiveYear.months.map((m) => (
+                            <li>
+                              <a
+                                href={`/blog/archive/${archiveYear.year}/${m.month}/`}
+                                class="archive-link"
+                              >
+                                {Number(m.month)}月
+                                <span class="widget-item-count">
+                                  ({m.count})
+                                </span>
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    </li>
+                  ))}
+                </ul>
+              )
+            }
           </div>
         </aside>
       </div>

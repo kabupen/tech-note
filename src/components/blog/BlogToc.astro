@@ -14,30 +14,47 @@ const { toc } = Astro.props as Props;
 
 {
   toc.length > 0 && (
-    <section class="text-[12px]">
-      <h2 class="mb-1 text-[11px] font-semibold tracking-wide text-slate-500">
+    <section class="text-[14px] leading-relaxed">
+      <h2 class="mb-2 text-[13px] font-semibold tracking-wide text-slate-500">
+        <iconify-icon icon="heroicons-outline:bars-3" />
         目次
       </h2>
-      <nav class="mt-1 leading-relaxed">
+
+      <nav class="mt-1">
         <ul class="space-y-1">
-          {toc.map((item) => (
-            <li
-              class:list={[
-                "truncate",
-                item.depth === 2 && "pl-0",
-                item.depth === 3 && "pl-3 text-slate-600",
-                item.depth >= 4 && "pl-5 text-[11px] text-slate-500",
-              ]}
-            >
-              <a
-                href={`#${item.slug}`}
-                data-toc-target={item.slug}
-                class="inline-block rounded px-1 py-0.5 text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+          {toc.map((item) => {
+            const isH1 = item.depth === 1;
+            const isH2 = item.depth === 2;
+            const isH3 = item.depth === 3;
+            const isH4 = item.depth >= 4;
+
+            return (
+              <li
+                class:list={[
+                  "relative truncate",
+                  isH1 && "pl-0 font-semibold text-slate-900",
+                  isH2 && "pl-2",
+                  isH3 && "pl-5 text-slate-600",
+                  isH4 && "pl-8 text-slate-500 text-[13px]",
+                ]}
               >
-                {item.text}
-              </a>
-            </li>
-          ))}
+                {/* ガイドライン（depth >= 3 用） */}
+                {item.depth >= 3 && (
+                  <span class="absolute left-0 top-0 h-full w-px bg-slate-300" />
+                )}
+
+                <a
+                  href={`#${item.slug}`}
+                  data-toc-target={item.slug}
+                  class="inline-block rounded px-1 py-0.5 transition
+                       hover:bg-slate-100 hover:text-slate-900
+                       text-inherit"
+                >
+                  {item.text}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </section>
