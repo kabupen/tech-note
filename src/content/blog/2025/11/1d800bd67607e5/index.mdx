@@ -1,0 +1,247 @@
+---
+title: "ollama で gpt-oss:20b を動かしてみよう"
+pubDate: 2025/11/21
+categories: ["機械学習"]
+tags: ["ollama", "Jetson", "gpt-oss"]
+description: "かなり今更ながらですが、gpt-oss 20b モデルをローカルで触ってみました。"
+---
+
+import Figure from "@/components/blog/Figure.astro";
+
+# はじめに
+
+# gpt-oss とは
+
+かなり今更な内容ではありますが、gpt-oss 20b モデルを使ってみるまでの手順と試行錯誤についてまとめてみようと思います。
+
+gpt-oss は 2025 年 8 月 5 日に公開された OSS の言語モデルで、120b^[https://huggingface.co/openai/gpt-oss-120b] と 20b^[https://huggingface.co/openai/gpt-oss-20b] の二種類のモデルがリリースされました。
+その当時は「これはとてつもない時代になるぞ」と思ったのですが、驚き屋が驚いていただけなのかその後どうなっているかは分からず...。
+gpt-oss の 120b を動作させるには 80GB のメモリが必要な一方で（A100 以上）、
+20b のモデルは 16GB のメモリがあれば動作します。そこで、gpt-oss 20b をローカルで動かしてみて、どういったものなのかを改めて見てみたいなと思います。
+
+# 環境構築
+
+今回は API サーバーとして Jetson AGX Orin、API を実行する環境として macmini を用いました。
+Jetson と mac は家の同一の Wi-Fi に接続していて、同一ローカルネットワーク内にいることを想定しています。
+
+- Jetson AGX Orin 64GB
+- macmin 2020 16GB
+
+## Jetson 側でのセットアップ
+
+今回は API サーバー、推論用 GUI としてよく使用されるライブラリを用いて簡単な環境構築を行いました。
+推論サーバーとして使用する Jetson には、LLM の API を提供するための ollama と GUI を介して使用するための open-webui をインストールします。
+
+### Ollama
+
+下記のコマンドでインストールします^[GitHub: https://github.com/ollama/ollama]。
+
+```sh
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+インストールが完了すると、systemd のサービスとして常駐します。外部から Jetson 上で動作する Ollama にアクセスするために、サービスの起動設定を以下のように修正しておきます。
+
+```sh
+sudo systemctl edit ollama.service
+
+# 下記を追記
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_ORIGINS=192.168.0.*"
+```
+
+ファイルを保存後、サービスを再起動します。
+
+```sh
+sudo systemctrl restart ollama
+```
+
+この状態で、11434 ポートで待ち受けの状態になっていれば OK です。
+
+```sh
+$ sudo lsof -i :11434
+COMMAND  PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+ollama  5372 ollama    3u  IPv6  71034      0t0  TCP *:11434 (LISTEN)
+```
+
+使用したいモデルをインストールしておきます。
+
+```sh
+$ ollama pull gpt-oss:20b
+...
+```
+
+ここまでの手順で Jetson 側のセットアップは完了です。
+
+### Open Web-UI のセットアップ
+
+ローカル LLM を使用するための GUI ツールも Jetson へインストールしておきます。この構成は Jetson 上でなくても、別 PC 上でも大丈夫ですが
+今回は余裕があったので Jetson 上での環境構築を選択しています。
+
+```sh
+docker pull ghcr.io/open-webui/open-webui:main
+```
+
+## Mac 側での処理
+
+mac 側にも ollama を入れておきます。私は Homebrew 経由でインストールしました。
+
+```
+brew install ollama
+```
+
+mac 上の ollama が Jetson 上の ollama を認識するために、
+
+```sh
+export OLLAMA_HOST=http://192.168.0.174:11434
+```
+
+の環境変数を設定します。この状態で
+
+```sh
+$ ollama list
+NAME           ID              SIZE     MODIFIED
+gpt-oss:20b    aa4295ac10c3    13 GB    3 months ago
+```
+
+Jetson 上にインストールした gpt-oss:20b のモデルが読み込めていればセットアップ完了です。
+
+# 遊んでみる
+
+## ollama CLI ベースで
+
+それでは実際に、`ollama` を介して Jetson 上で動作する `gpt-oss:20b` で推論させてみたいと思います。mac 側で
+
+```sh
+ollama run gpt-oss:20b
+```
+
+を実行することで、ollama の CLI インターフェースが起動し、プロンプトを入力することができるようになります。
+上記の設定を行っておくことで、推論自体は Jetson 上で動作させることができています。
+
+特に聞くこともないので「けいおん！」について聞いてみました。その通りの答えが返ってきました。
+ただ何度か試行していると、感じに弱いのか「唯」の感じが別の漢字になっていたりしました。
+
+<Figure
+  src="1d800bd67607e5_fig1.gif"
+  width={400}
+  alt="図の説明"
+  caption="けいおん！について聞いてみました。"
+/>
+
+## Open Web-UI で
+
+次に、Open-WebUI を介して操作してみたいと思います。Jetson 上で
+
+```sh
+docker run \
+    -d --network=host \
+    -v ${HOME}/open-webui:/app/backend/data \
+    -e OLLAMA_BASE_URL=http://127.0.0.1:11434 \
+    --name open-webui \
+    --restart always \
+    ghcr.io/open-webui/open-webui:main
+```
+
+を実行します。しばらく待ってから（5 分くらいは待ちました）、mac の Chrome から `http://<JetsonのIPアドレス>:8080` にアクセスすると
+Open WebUI の画面に接続できます。こちらでも特に聞くこともないので「けいおん！」について聞いてみました。
+先程言っていたように、漢字が違う返答が出力されました。
+
+<Figure
+  src="1d800bd67607e5_fig2.gif"
+  width={500}
+  alt="図の説明"
+  caption="けいおん！について聞いてみました。"
+/>
+
+# ちょっと実用的に使ってみる
+
+私は ChatGPT を、機械学習用スクリプトのテンプレートの作成や試行錯誤などによく使っています。
+そこで gpt-oss のちょっと実用的な使い方として、どれくらい機械学習のモデリングタスクを肩代わりできるのかを見てみたいと思います。
+とはいえややこしいタスクをここで議論するのは大きく本筋から外れてしまう気もするので、MNIST の学習コードがどれくらい簡単に作れるのかを見ることとしました。
+
+## プロンプトでのやり取り
+
+プロンプトで
+
+```
+MNIST のデータを使って数字の識別を行うためのCNNモデルを組みたいです。MNIST のデータをダウンロードし、
+- 学習スクリプト train.py
+- データセット dataset.py
+- 推論用スクリプト infer.py
+を pytorch で実装してください。
+```
+
+と入力し、MNIST の学習、推論、デバッグなどを gpt-oss でやってみました。実際のプロンプトのやり取りは
+
+に置いています。5 分もかからず、train.py, dataset.py, infer.py を作成してくれましたので、これらを実際に実行しています。
+
+## 学習
+
+まずは学習です。
+作成したスクリプトで実際に学習を実行してみると、特にエラーがなく 10 エポック終了し、validation accuracy が 99.30% という精度を出すことができています。
+
+```
+(venv) ktakeda@macmini:~/workspace/blog/tech-note-sandbox/src/2025/11/1d800bd67607e5 $ python train.py --epochs 10 --batch-size 128 --lr 0.001
+...
+Epoch [10] Batch [200/469] Loss: 0.0046
+Epoch [10] Batch [300/469] Loss: 0.0517
+Epoch [10] Batch [400/469] Loss: 0.0038
+==> Epoch [10] Train Loss: 0.0237 Acc: 99.21%
+==> Epoch [10] Val  Loss: 0.0229 Acc: 99.30%
+Training finished. Best Acc: 99.31
+```
+
+## 推論
+
+推論用の画像生成、推論用スクリプトも作成してもらったのでそれを使って推論します。
+まず推論用の画像として
+
+<Figure
+  src="1d800bd67607e5_fig3.png"
+  width={50}
+  alt="図の説明"
+  caption="予測用の「７」という画像"
+/>
+
+を作ってもらいました。これに対して推論を行うと、
+
+```
+(venv) ktakeda@macmini:~/workspace/blog/tech-note-sandbox/src/2025/11/1d800bd67607e5 $ python infer.py --model-path model.pth --image ./sample.png
+Using device: cpu
+Image: ./sample.png
+Prediction: 3 (confidence=0.4697)
+```
+
+とのことで予測は「３」と出てしまい、実際の汎化精度としてはイマイチかなと言ったところでした。
+それでもここまでを脳死で 5 分で作れてしまう能力は、MNIST は有名なタスクのため gpt-oss の学習データにきっと含まれているとはいえ、
+十分にすごいモデルだと思います。
+
+## 感想
+
+普段の ChatGPT との違いとして簡単に触った感じ以下のような違いが見えました。
+
+- mac の環境に対応してくれない
+  - `infer.py` 用の予測画像作成時にフォントデータを使っているのですが、mac にあるフォントをうまくパスを提案してくれなかったです
+- 微妙に「そうじゃない」という出力が返ってくる
+  - infer.py での精度が悪かったので改善案を聞くとテストデータの調整を始めようとし、そうじゃなくって、って思いました（train.py の改善を期待していたのですが）
+  - 普段の ChatGPT5 だと（パラメーター数など比較対象として不適だとは思いますが）文脈から察してくれる能力は高いのかなと。
+
+もちろん ChatGPT のクオリティには及びませんが、5 分もかからず MNIST 学習のベースラインを出力できたという部分は本当にすごいです。
+ChatGPT が従量課金制なら gpt-oss の使用を混ぜつつでやっていく世界はあるかなと思いました。
+個人利用のレベルで gpt-oss をガッツリと使いたいというユースケースを少し深ぼっていきたいですね。
+
+# 最後に
+
+では最後に、ここまで書いてきた内容を gpt-oss 20b に要約させてみたいと思います。
+ここまでの内容をコピペしてプロンプトに入れて要約させました。
+
+Q. この記事を要約してください。
+
+```
+Jetson AGX Orinでollamaにgpt-oss20bをインストールしMacからリモート実行。OpenWebUIで“けいおん！”を試し漢字の差を確認。MNIST用CNNを作成し10エポで99.3%達成。推論誤認識が発生。ChatGPTより高速だが挙動差を指摘し活用可能性示唆。GPUなしでも動作し、コスト効率が高い。データ準備も簡単で、今後の個人プロジェクト活用に期待できるよ。
+```
+
+とのことです。ちなみに処理に 8 分くらいかかったので、ロングコンテキストの処理はローカル環境（Jetson）の限界かなと思いました。
+このあたりも量子化や最適化などでどれくらい改善されるのかはぜひ追っていきたいですね。

@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 
 // src/content/blog 以下の画像を全部集める
-// Figure.astro は src/components にある前提
 const images = import.meta.glob(
   "/src/content/blog/**/*.{png,jpg,jpeg,gif,webp,svg}",
   { eager: true },
@@ -31,7 +30,8 @@ const imageModule = entry ? (entry[1] as any) : null;
         src={imageModule.default}
         alt={alt}
         width={width}
-        class="mx-auto"
+        class="mx-auto rounded-none"
+        style="border-radius: 0"   /* 念のため完全に角丸を打ち消す */
       />
       {caption && (
         <figcaption class="mt-2 text-center text-sm text-gray-500">
@@ -42,7 +42,7 @@ const imageModule = entry ? (entry[1] as any) : null;
   ) : (
     <figure class="my-6 border border-red-300 bg-red-50 p-2 text-sm text-red-800">
       <p>
-        画像「{src},{images[0]},{entry}」が見つかりませんでした。
+        画像「{src}」が見つかりませんでした。
       </p>
     </figure>
   )

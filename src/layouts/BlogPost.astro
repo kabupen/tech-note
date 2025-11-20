@@ -10,6 +10,7 @@ import BlogHeader from "@/components/blog/BlogHeader.astro";
 import BlogToc from "@/components/blog/BlogToc.astro";
 import BlogRelatedPosts from "@/components/blog/BlogRelatedPosts.astro";
 import BlogContent from "@/components/blog/BlogContent.astro";
+import Comments from "@/components/blog/Comments.astro";
 
 import type { CollectionEntry } from "astro:content";
 
@@ -116,6 +117,11 @@ const toc: TocItem[] =
               </div>
             )
           }
+          <div>
+            <div class="mx-auto w-full max-w-4xl">
+              <Comments term={title} />
+            </div>
+          </div>
         </div>
 
         {
