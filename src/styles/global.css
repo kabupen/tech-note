@@ -32,16 +32,15 @@ body {
   background: #f7f8fc; /* サイト全体のベース背景だけ決める */
 }
 
-
 /* ---------------------------------------
  * 脚注
  * ------------------------------------ */
 .footnote-ref a {
   text-decoration: none; /* 下線なし */
-  color : rgb(0, 128, 255); 
-  font-size: 1.em;
-  display: inline-block;    /* scroll-margin-top を確実に効かせるため */
-  scroll-margin-top: 80px;  /* ヘッダーの高さ + 少し余白分。値はお好みで調整 */
+  color: rgb(0, 128, 255);
+  font-size: 1em;
+  display: inline-block; /* scroll-margin-top を確実に効かせるため */
+  scroll-margin-top: 80px; /* ヘッダーの高さ + 少し余白分。値はお好みで調整 */
 }
 
 .footnote-backref {
@@ -49,5 +48,31 @@ body {
   margin-left: 0.25rem;
   font-size: 0.85em;
   display: inline-block;
-  scroll-margin-top: 80px;  /* こちらもヘッダー分オフセット */
+  scroll-margin-top: 80px; /* こちらもヘッダー分オフセット */
+}
+
+/* ---------------------------------------
+ * インラインコード調整 (tailwind デフォルト挙動の調整)
+ * ------------------------------------ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* インラインコードの基本スタイル */
+  .prose code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    font-weight: 400;
+    font-size: 0.9em;
+    padding: 0.1em 0.3em;
+    border-radius: 0.25rem;
+    background-color: rgb(241 245 249); /* お好みで */
+  }
+
+  /* Tailwind Typography が足しているバッククォートを消す */
+  .prose code::before,
+  .prose code::after {
+    content: "" !important;
+  }
 }
