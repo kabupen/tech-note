@@ -1,20 +1,18 @@
 ---
-title: '鳥コンペ　(Cornell Birdcall Identification)'
-description: ""
+title: "鳥コンペ　(Cornell Birdcall Identification)"
 pubDate: 2024-03-05T23:36:12+09:00
-heroImage: '@/assets/blog-placeholder-2.jpg'
-tags: ["Kaggle"]
+categories: ["Kaggle"]
+description: ""
 ---
+
 ## コンペ概要
 
-
-
 ## [1st Place Solution](https://www.kaggle.com/competitions/birdsong-recognition/discussion/183208)
-
 
 #### Model
 
 - デフォルトの SED (Sound Event Detection) モデル（[公開 notebook](https://www.kaggle.com/code/hidehisaarai1213/introduction-to-sound-event-detection/notebook)）では 80 million パラメータがあるため、モデルを小さくする試みを行った
+
   - [PANNs](https://arxiv.org/abs/1912.10211) のモデルがベースらしい
   - 少数データでの過学習を抑制する目的
 
@@ -41,7 +39,7 @@ tags: ["Kaggle"]
 
 #### Ensemble
 
-- LB ベースでモデルを選定し、13モデルのアンサンブルを実施
+- LB ベースでモデルを選定し、13 モデルのアンサンブルを実施
   - ただ時間の兼ね合いで個々のモデルについて深追いはできなかった、ensemble したらスコアが伸びるだろうという考えを信じてやっていた
 
 #### コード関連
@@ -50,9 +48,7 @@ tags: ["Kaggle"]
 - https://github.com/ryanwongsa/kaggle-birdsong-recognition
   - [mixup.py](https://github.com/ryanwongsa/kaggle-birdsong-recognition/blob/master/src/augmentations/mixup.py)
 
-
 ## [3rd Place Solution](https://www.kaggle.com/competitions/birdsong-recognition/discussion/183199)
-
 
 ### Model
 
@@ -68,7 +64,6 @@ tags: ["Kaggle"]
 - cropping
   - 適当にクロッピングするのではなく、何らかの条件に応じた cropping を実施
 
-
 ## [4th Place Solution](https://www.kaggle.com/competitions/birdsong-recognition/discussion/183339)
 
 #### Model
@@ -80,12 +75,12 @@ tags: ["Kaggle"]
 
 #### Data
 
-- CNN で feature extraction したが、3チャンネルにする必要があった
-  - Logmel を3回重ねた (good baseline)
+- CNN で feature extraction したが、3 チャンネルにする必要があった
+  - Logmel を 3 回重ねた (good baseline)
 - not work
   - frequency encoding
     - 過去コンペで使用されていたもの（[code](https://www.kaggle.com/c/freesound-audio-tagging-2019/discussion/97926)）
-    - 発想としては、CNN はposition-invariant であるが、スペクトログラムそれ自体は画像のようで画像ではなく y-axis の並び順が重要であるとのこと [^1]
+    - 発想としては、CNN は position-invariant であるが、スペクトログラムそれ自体は画像のようで画像ではなく y-axis の並び順が重要であるとのこと ^[CNN の inductive bias について議論しているのかも。CNN 自体 global feature（位置関係）は積極的には取りいれていないのでそれを何とかしたいという話か。]
   - loudness
   - spectral centroid
 
@@ -100,26 +95,24 @@ tags: ["Kaggle"]
 
 #### Ensemble
 
-- 14実験（70モデル）のアンサンブルを実施
+- 14 実験（70 モデル）のアンサンブルを実施
   - https://www.kaggle.com/code/vladimirsydor/4-th-place-solution-inference-and-training-tips/notebook#ALL-My-Models
 
-
-
 ## [6th Place Solution](https://www.kaggle.com/competitions/birdsong-recognition/discussion/183204)
-
 
 - Trust LB した
   - よい local での validation ができなかったため（train/test に大きな乖離が見られていたらしい）、ignoce CV の戦略を採った
 
-
 #### 1st stage
 
 ##### Model
+
 - PANN モデル
-- attention pooling, max poolint 
+- attention pooling, max poolint
   - weak prediction を作成するために利用した
 
 ##### Data
+
 ##### Data Augmentation
 
 - NoiseInjection (max noise amp. 0.0.4)
@@ -131,7 +124,6 @@ tags: ["Kaggle"]
 - Adam
 - CosineAnnealing
 
-
 ## 感想
 
 - optimizer, scheduler は特にベースラインから動かしてなさそう（Adam, etc）
@@ -141,8 +133,3 @@ tags: ["Kaggle"]
 - Dropout が単純に効く
   - Multi-sample dropout ?
 - モデルをたくさん試す、ということは効いていない印象
-
-
-
-
-[^1]: CNN の inductive bias について議論しているのかも。CNN自体 global feature（位置関係）は積極的には取りいれていないのでそれを何とかしたいという話か。

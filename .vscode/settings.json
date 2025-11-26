@@ -16,5 +16,8 @@
     "editor.defaultFormatter": "astro-build.astro-vscode",
     "editor.tabSize": 2,
     "editor.insertSpaces": true
+  },
+  "[mdx]": {
+    "editor.wordWrap": "on"
   }
 }
