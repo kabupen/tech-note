@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://kabupen.com/sitemap-index.xml

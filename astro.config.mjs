@@ -12,15 +12,14 @@ import tailwindcss from "@tailwindcss/vite";
 
 import { remarkInlineFootnote } from "./src/utils/remarkInlineFootnote.js";
 
-
 // https://astro.build/config
 export default defineConfig({
   // site は 1 箇所だけにする
   site: "https://kabupen.com",
 
   integrations: [
-    mdx(),      // MDX
-    sitemap(),  // サイトマップ
+    mdx(), // MDX
+    sitemap(), // サイトマップ
   ],
 
   markdown: {
