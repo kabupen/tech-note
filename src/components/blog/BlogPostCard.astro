@@ -1,0 +1,71 @@
+---
+// src/components/blog/BlogPostCard.astro
+import { getCollection } from "astro:content";
+import FormattedDate from "@/components/FormattedDate.astro";
+
+interface Props {
+  /**
+   * /blog/<ここ>/ に相当する文字列
+   * 例: "04468d40961a61"
+   */
+  slug: string;
+}
+
+const { slug } = Astro.props as Props;
+
+// blog コレクションを全部取得して、entry.id に slug が含まれるものを探す
+const posts = await getCollection("blog");
+const entry = posts.find((p) => p.id.includes(slug));
+
+// URL は /blog/<slug>/ 固定
+const href = `/blog/${slug}/`;
+---
+
+{
+  entry ? (
+    <article class="blog-post-card not-prose group rounded-2xl border border-slate-200 bg-white px-4 py-4 text-[13px] shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+      <a href={href} class="block no-underline">
+        {/* (1) タイトルに上側の余白をつける */}
+        <h3 class="mt-2 line-clamp-2 text-[15px] font-semibold leading-snug text-slate-900 group-hover:text-sky-700">
+          {entry.data.title}
+        </h3>
+
+        {/* (2) タイトル → description → 日付 が縦に並ぶ */}
+        {entry.data.description && (
+          <p class="mt-1.5 line-clamp-3 text-[12px] leading-relaxed text-slate-600">
+            {entry.data.description}
+          </p>
+        )}
+
+        <p class="mt-2.5 mb-2 text-[11px] text-slate-500">
+          <FormattedDate date={entry.data.pubDate} />
+        </p>
+      </a>
+    </article>
+  ) : (
+    <div style="border: 1px solid #f87171; padding: 0.75rem; border-radius: 0.75rem;">
+      <strong>記事が見つかりませんでした。</strong>
+      <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem;">
+        slug=<code>{slug}</code> に一致する記事が見つかりませんでした。
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* BlogPostCard 専用のサイズ調整 */
+  .blog-post-card {
+    /* 横幅: 親要素に対して 75% */
+    width: 95% !important;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+
+  /* 画面がかなり狭い時だけ、少しだけ幅を広げて読みやすくするオプション */
+  @media (max-width: 640px) {
+    .blog-post-card {
+      width: 70% !important;
+    }
+  }
+</style>
