@@ -6,6 +6,7 @@ import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/consts";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { getBlogSlugFromId } from "@/utils/blogSlug"; // ★ 追加
 
 // すべての公開記事を取得（draft を除外）
 const allPosts = await getCollection("blog", ({ data }) => !data.draft);
@@ -15,14 +16,14 @@ const latestPosts = [...allPosts]
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
 
-// 人気記事: とりあえず slug のリストで管理
-const POPULAR_SLUGS = [
-  // "diffusion-basics",
-  // "hsi-intro",
+// 人気記事: 「id」で管理した方が安全
+// 例: "2025/11/04468d40961a61/index"
+const POPULAR_IDS: string[] = [
+  // "2025/11/04468d40961a61/index",
 ];
 
-const popularPosts: CollectionEntry<"blog">[] = POPULAR_SLUGS.map((slug) =>
-  allPosts.find((post) => post.slug === slug)
+const popularPosts: CollectionEntry<"blog">[] = POPULAR_IDS.map((id) =>
+  allPosts.find((post) => post.id === id)
 ).filter((p): p is CollectionEntry<"blog"> => Boolean(p));
 ---
 
@@ -36,17 +37,30 @@ const popularPosts: CollectionEntry<"blog">[] = POPULAR_SLUGS.map((slug) =>
   >
     <Header />
 
-    {
-      /*
-      ★ Header.astro と同じコンテナ幅に統一
-         mx-auto max-w-7xl px-4 sm:px-6 lg:px-6
-    */
-    }
     <main class="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-6 lg:pb-14">
       <section class="mb-10">
-        <h1 class="text-2xl font-semibold tracking-tight">🧑‍🚀 kabupen</h1>
-        <p class="mt-2 text-slate-600">はじめまして〜</p>
+        <div class="flex items-center gap-4">  {/* ★ items-start → items-center */}
+          <img
+            src="/icon.png"
+            alt="kabupen のアイコン"
+            class="h-34 w-34 rounded-full border-2 border-black bg-white object-cover"
+            loading="lazy"
+          />
+          <div>
+            <h1 class="text-xl font-semibold tracking-tight">
+              kabupen
+            </h1>
+            <p class="mt-2 text-slate-600">
+              機械学習・iOS 開発など、日々の試行錯誤をメモとして残しています。
+            </p>
+            <p class="mt-1 text-slate-600">
+              自分の備忘録が中心ですが、どこかで誰かの実装のヒントになれば、と。
+            </p>
+          </div>
+        </div>
       </section>
+
+
 
       <section class="mb-10">
         <div class="mb-4 flex items-baseline justify-between gap-4">
@@ -58,36 +72,12 @@ const popularPosts: CollectionEntry<"blog">[] = POPULAR_SLUGS.map((slug) =>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {
-            latestPosts.map((post) => (
-              <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
-                <a
-                  href={`/blog/${post.slug}/`}
-                  class="block no-underline text-inherit"
-                >
-                  <h3 class="mb-1 text-sm font-semibold">{post.data.title}</h3>
-                  <p class="mb-1 text-[11px] text-slate-400">
-                    {post.data.pubDate.toLocaleDateString("ja-JP")}
-                  </p>
-                  <p class="text-xs text-slate-600">{post.data.description}</p>
-                </a>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      {
-        popularPosts.length > 0 && (
-          <section class="mb-10">
-            <div class="mb-4 flex items-baseline justify-between gap-4">
-              <h2 class="text-lg font-semibold">人気の記事</h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {popularPosts.map((post) => (
+            latestPosts.map((post) => {
+              const slug = getBlogSlugFromId(post.id); // ★ 追加
+              return (
                 <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
                   <a
-                    href={`/blog/${post.slug}/`}
+                    href={`/blog/${slug}/`}   // ★ post.slug → slug
                     class="block no-underline text-inherit"
                   >
                     <h3 class="mb-1 text-sm font-semibold">
@@ -101,7 +91,41 @@ const popularPosts: CollectionEntry<"blog">[] = POPULAR_SLUGS.map((slug) =>
                     </p>
                   </a>
                 </article>
-              ))}
+              );
+            })
+          }
+        </div>
+      </section>
+
+      {
+        popularPosts.length > 0 && (
+          <section class="mb-10">
+            <div class="mb-4 flex items-baseline justify-between gap-4">
+              <h2 class="text-lg font-semibold">人気の記事</h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularPosts.map((post) => {
+                const slug = getBlogSlugFromId(post.id); // ★ 追加
+                return (
+                  <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400 hover:shadow-md">
+                    <a
+                      href={`/blog/${slug}/`} // ★ post.slug → slug
+                      class="block no-underline text-inherit"
+                    >
+                      <h3 class="mb-1 text-sm font-semibold">
+                        {post.data.title}
+                      </h3>
+                      <p class="mb-1 text-[11px] text-slate-400">
+                        {post.data.pubDate.toLocaleDateString("ja-JP")}
+                      </p>
+                      <p class="text-xs text-slate-600">
+                        {post.data.description}
+                      </p>
+                    </a>
+                  </article>
+                );
+              })}
             </div>
           </section>
         )

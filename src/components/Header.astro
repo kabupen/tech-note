@@ -31,7 +31,7 @@ const currentPath = Astro.url.pathname;
       <div class="flex items-center gap-8">
         <a
           href="/"
-          class="text-base font-semibold tracking-tight text-[var(--black)] no-underline hover:opacity-80"
+          class="inline-flex items-center text-base font-semibold tracking-tight text-[var(--black)] no-underline hover:opacity-80"
         >
           {SITE_TITLE}
         </a>
@@ -82,7 +82,12 @@ const currentPath = Astro.url.pathname;
           rel="noreferrer"
           class="inline-flex items-center text-[var(--black)] no-underline opacity-80 transition hover:opacity-100"
         >
-          X
+          <img
+            src="/icon.png"
+            alt="kabupen ロゴ"
+            class="h-7 w-7 rounded-full border border-black/20 object-cover"
+            loading="lazy"
+          />
         </a>
       </div>
     </nav>
