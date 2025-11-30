@@ -128,35 +128,119 @@ V^\pi(s) &= E^\pi[G_t | S_t =s] \\
 \end{align*}
 $$
 
-$t+1$ の項について、$S_t=s$ の条件のもとで得られる報酬の期待値を考えます。行動 $A_t=a$ を選択し 1 ステップ後に $S_{t+1}=s^\prime$となる確率は
+とできます。
 
-$$
-P(s^\prime|s,a) \pi(a|s)
-$$
+第一項目（$t+1$ の項）について、時刻 $t$ から $t+1$ へ 1 ステップ移動するときの報酬の期待値を意味しています（ $S_t=s$ の条件付き期待値）。
 
-で表されるため、このときに得られる報酬は
+<Figure
+  src="20251129-113439.png"
+  width={400}
+  alt="図の説明"
+  caption="第一項の期待値計算の考え方"
+/>
+
+この期待値は上図にあるように、
+
+- 状態 $S_t=s$ で方策に従って行動 $A_t=a$ を選択し（確率 $\pi(a|s)$）
+- その選択した行動で状態 $S_{t+1}=s^\prime$ に遷移する（確率 $P(s^\prime|a,s)$
+
+という考え方をもとに計算をすると導出できます。そのため、 1 ステップ後に $S_{t+1}=s^\prime$へ遷移するときに得られる報酬は
 
 $$
 P(s^\prime|s,a) \pi(a|s) \times r(s,a,s^\prime)
 $$
 
-です。$a$ と $s^\prime$ について全てを足し合わせると$S_t=s$ の条件のもとで得られる報酬の期待値となるため、
+で表されます。行動 $a$ と 状態$s^\prime$ について全てのパターンを網羅することで、$S_t=s$ の条件付き報酬の期待値、
 
 $$
 E^\pi [R_{t+1}|S_t=s] = \sum_{a \in A} \pi(a|s)\sum_{s^\prime \in S} P(s^\prime|s,a) r(s,a,s^\prime)
 $$
 
-と計算できます。$t+2$ 以降の項については、
+が計算できます。
+
+第二項（$t+2$ 以降の項）について、
 
 $$
 \begin{align*}
   &E^\pi [ \gamma R_{t+2} + \gamma^2 R_{t+3} + ... | S_t = s] \\
-  &= \sum_{a\in A} \pi(a|s) \sum_{s^\prime in S} P(s^\prime|s,a) E^\pi [R_{t+2} + \gamma R_{t+3} + ... | S_{t+1}=s^\prime] \\
-  &= \sum_{a\in A} \pi(a|s) \sum_{s^\prime in S} P(s^\prime|s,a) V^\pi(s^\prime)
+  &= \sum_{a\in A} \pi(a|s) \sum_{s^\prime \in S} P(s^\prime|s,a) E^\pi [R_{t+2} + \gamma R_{t+3} + ... | S_{t+1}=s^\prime] \\
+  &= \sum_{a\in A} \pi(a|s) \sum_{s^\prime \in S} P(s^\prime|s,a) V^\pi(s^\prime)
 \end{align*}
 $$
 
 となり、これらをまとめることで、ベルマン方程式が導出できます。
+
+## 書き換え
+
+和の形のベルマン方程式から「条件付き期待値」の形に書き換えることができます^[こちらの形のほうが逐次的であることがより明確に理解できると思います]。先程導出した状態価値関数のベルマン方程式を改めて書いておきます。
+
+$$
+V^{\pi}(s)
+= \sum_{a} \pi(a \mid s)
+    \sum_{s'} P(s' \mid s,a)
+    \Bigl[
+      R(s,a,s') + \gamma V^{\pi}(s')
+    \Bigr]
+\tag{★}
+$$
+
+ここで、記法を簡単にするため
+
+$$
+f(s', a) := R(s,a,s') + \gamma V^{\pi}(s')
+$$
+
+と定義しておきます。このとき (★) の右辺は
+
+$$
+\begin{aligned}
+\text{RHS of }(★)
+&= \sum_{a} \pi(a \mid s)
+    \sum_{s'} P(s' \mid s,a)\, f(s', a) \\
+&= \sum_{a} \sum_{s'} \pi(a \mid s)\, P(s' \mid s,a)\, f(s', a).
+\end{aligned}
+$$
+
+一方、MDP と方策の定義から
+
+$$
+\Pr(A_t = a, S_{t+1} = s' \mid S_t = s)
+= \pi(a \mid s)\, P(s' \mid s,a)
+$$
+
+が成り立ちます。したがって、上の式は
+
+$$
+\begin{aligned}
+\text{RHS of }(★)
+&= \sum_{a} \sum_{s'}
+   \Pr(A_t = a, S_{t+1} = s' \mid S_t = s)\, f(s', a) \\
+&= \mathbb{E}\bigl[
+     f(S_{t+1}, A_t)
+     \,\big|\,
+     S_t = s
+   \bigr]
+\end{aligned}
+$$
+
+と、条件付き期待値の形に書き換えられます。定義に戻せば
+
+$$
+f(S_{t+1}, A_t) = R(S_t, A_t, S_{t+1}) + \gamma V^{\pi}(S\_{t+1})
+$$
+
+なので、
+
+$$
+V^\pi(s)
+= \mathbb{E}\bigl[
+  R_{t+1} + \gamma V^{\pi}(S_{t+1})
+  \,\big|\,
+  S_t = s
+\bigr]
+$$
+
+という、期待値形式のベルマン方程式が得られます。
 
 ## 次回以降で
 
