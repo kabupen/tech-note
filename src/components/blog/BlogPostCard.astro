@@ -56,16 +56,10 @@ const href = `/blog/${slug}/`;
   /* BlogPostCard 専用のサイズ調整 */
   .blog-post-card {
     /* 横幅: 親要素に対して 75% */
-    width: 95% !important;
+    width: 95%;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 0.4rem;
     box-sizing: border-box;
-  }
-
-  /* 画面がかなり狭い時だけ、少しだけ幅を広げて読みやすくするオプション */
-  @media (max-width: 640px) {
-    .blog-post-card {
-      width: 70% !important;
-    }
   }
 </style>

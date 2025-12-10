@@ -1,3 +1,4 @@
+from datetime import datetime  
 from pathlib import Path
 import os
 import random
@@ -22,10 +23,14 @@ description: ""
 if __name__ == "__main__":
     hash_var = generate_hash()
 
-    dir_name = f"src/content/blog/2025/11/{hash_var}"
+    today = datetime.now()
+    year = today.year
+    month = today.month  # 1〜12
+
+    dir_name = f"src/content/blog/{year}/{month}/{hash_var}"
     index_path = Path(dir_name) / "index.mdx"
 
-    print(">>>>", dir_name)
+    print(">>>>", index_path)
 
     os.makedirs(dir_name, exist_ok=True)
 
