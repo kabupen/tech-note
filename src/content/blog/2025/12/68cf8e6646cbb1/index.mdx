@@ -1,0 +1,152 @@
+---
+title: "Mac から WSL(Ubuntu) 上の RTX 5090 環境へ SSH するまでの設定手順"
+pubDate: 2025/12/20
+categories: ["開発環境", "GPU"]
+tags: ["WSL2", "Windows", "RTX5090", "portproxy"]
+description: "Windows PC に搭載した RTX 5090 を計算リソースとして活用し、Mac から WSL2(Ubuntu) 環境へ直接 SSH 接続するための設定手順を、port proxy を用いた実用的な構成で解説します。"
+---
+
+# はじめに
+
+Windows PC に搭載した RTX 5090 を計算リソースとして活用しつつ、開発は Mac から行うための構成を作成してみました。
+
+- Windows + WSL2(Ubuntu) 環境を構築する
+- Mac から WSL 上の Ubuntu に直接 SSH 接続できるようにする
+
+という点にフォーカスし、port proxy を用いた実用的かつ安定した方法を解説します。WSL2 は内部的に NAT 配下で動作するため、 ネットワーク周りで少しつまずきやすいポイントがありますが、 本記事の手順をそのまま追えば再現できる構成になっています。
+
+# Mac から Windows へ疎通確認
+
+Mac から Windows へアクセスする前に、ネットワーク疎通を確認します。Windows 側で次の設定を行います。
+
+- 設定 → ネットワークとインターネット → Wi‑Fi（または Ethernet） → ネットワークプロファイルの種類を プライベートネットワーク
+
+に変更しておきます。
+
+<Figure
+  src="スクリーンショット 2025-12-20 195240.png"
+  width={600}
+  alt="図の説明"
+  caption="Ubuntu のインストール、初期化の流れ"
+/>
+
+この設定をしておくことで、Mac から Windows の IP アドレスへ ping が通るようになります。
+
+# Windows 側セットアップ
+
+ここでは、WSL を利用する前提として、Windows 側の基本セットアップを行います。まずは GPU ドライバが正しく導入され、RTX 5090 が Windows から認識されているかを確認します。以降の手順は、この前提が満たされていることを想定しています。
+
+## Windows 側で GPU を確認
+
+まず、Windows PC 上で GPU が正しく認識されていることを確認します。PowerShell を起動し、以下を実行します。
+今回は RTX 5090 が表示されているのが分かります、Windows 側の GPU ドライバは問題ありません。
+
+<Figure
+  src="スクリーンショット 2025-12-20 193036.png"
+  width={600}
+  alt="図の説明"
+  caption="Powershell から nvidia-smi を実行した結果"
+/>
+
+## WSL（Ubuntu）のインストール
+
+WSL2 と Ubuntu をインストールします。
+
+```sh
+wsl --install -d Ubuntu
+```
+
+インストール完了後、Windows を再起動します。再起動後、PowerShell から以下を実行すると Ubuntu が起動します。
+
+```sh
+wsl
+```
+
+初回起動時には、Ubuntu 用のユーザー名とパスワードを設定します。
+
+<Figure
+  src="スクリーンショット 2025-12-20 194247.png"
+  width={600}
+  alt="図の説明"
+  caption="Ubuntu のインストール、初期化の流れ"
+/>
+
+## port proxy の追加
+
+WSL2 は NAT 内部に存在するため、Mac から直接 WSL の IP アドレスへ SSH 接続することはできません。そこで、Windows の port proxy 機能を使い、
+
+- Windows のポート `2222`
+- WSL(Ubuntu) の SSH ポート `22`
+
+を転送します。PowerShell（管理者権限）で以下を実行します。
+
+```sh
+netsh interface portproxy add v4tov4 \
+  listenaddress=0.0.0.0 listenport=2222 \
+  connectaddress=172.23.117.81 connectport=22
+```
+
+※ `172.23.117.81` は WSL(Ubuntu) 側の IP アドレスです。
+`ip addr show eth0` で確認できます。
+
+<Figure
+  src="スクリーンショット 2025-12-20 222219.png"
+  width={600}
+  alt="図の説明"
+  caption="Ubuntu のインストール、初期化の流れ"
+/>
+
+### 設定確認
+
+```sh
+netsh interface portproxy show all
+```
+
+以下のように表示されれば設定は成功です。
+
+```text
+Listen on ipv4:             Connect to ipv4:
+0.0.0.0:2222                172.23.117.81:22
+```
+
+## Windows ファイアウォールの設定
+
+次に、SSH 用ポート（2222）をファイアウォールで許可します。
+
+```sh
+New-NetFirewallRule \
+  -DisplayName "WSL SSH Forward 2222" \
+  -Direction Inbound \
+  -Protocol TCP \
+  -LocalPort 2222 \
+  -Action Allow
+```
+
+<Figure
+  src="スクリーンショット 2025-12-20 222343.png"
+  width={600}
+  alt="図の説明"
+  caption="Ubuntu のインストール、初期化の流れ"
+/>
+
+# Mac から WSL(Ubuntu) へ SSH 接続
+
+以上の設定が完了すると、Mac から以下のコマンドで **WSL 上の Ubuntu に直接 SSH 接続**できます。
+
+```sh
+ssh <ubuntuユーザー名>@192.168.0.138 -p 2222
+```
+
+Ubuntu のシェルが表示されれば成功です。
+
+# おわりに
+
+本記事では、Mac を開発環境としつつ、Windows PC 上の RTX 5090 + WSL(Ubuntu) を計算サーバとして使うための最小構成を解説しました。
+
+この構成が完成すれば、
+
+- VS Code Remote - SSH による快適な開発
+- WSL 上での CUDA / PyTorch / Docker 利用
+- Mac から透過的に GPU 計算環境を操作
+
+といった環境が整います。次のステップとしては、CUDA や PyTorch のセットアップ、VS Code Remote の設定などをしていきたいと思います。
