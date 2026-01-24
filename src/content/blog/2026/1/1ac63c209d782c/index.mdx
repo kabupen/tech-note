@@ -1,0 +1,140 @@
+---
+title: "ComfyUI"
+pubDate: 2026/01/24
+categories: [""]
+tags: [""]
+description: ""
+---
+
+# ComfyUI とは
+
+ComfyUI は、ノード（部品）をつないで画像生成・編集のパイプラインを組む、ワークフロー型の UI です。
+Stable Diffusion WebUI（AUTOMATIC1111）に慣れていると、最初は「GUI で配線するのか……」と身構えるのですが、触ってみるとむしろ逆で、
+
+- 処理の流れが明示される（どこで何が起きているかが追える）
+- 再現性が高い（ワークフロー自体が設定の塊として残る）
+- 用途別テンプレートが強い（生成／編集／高解像／Control 系など）
+
+あたりが効いて、WebUI のタイミングの移行先として検討してみました。
+
+- リポジトリ: https://github.com/Comfy-Org/ComfyUI
+
+# 環境構築
+
+今回は Windows 上の WSL でセットアップしました。ComfyUI は Python で動くので、基本は venv + pip の素直な構成でOKです。
+
+```sh
+git clone https://github.com/Comfy-Org/ComfyUI
+cd ComfyUI
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+# 起動
+
+起動はシンプルです。
+
+```sh
+python main.py
+```
+
+起動後、ブラウザで http://localhost:8188 にアクセスします。
+
+## テンプレート選択
+
+UI にはテンプレート（ワークフロー雛形）が多数用意されています。
+今回はモデルフィルターから 「Flux.2 Dev」 を選び、テンプレートをそのまま使ってみました。
+
+<Figure src="20260124-123837.png" width={600} alt="図の説明" />
+
+モデルフィルターから「Flux.2 Dev」で、今回は、「Flux.2 Dev」 のテンプレートを使用しました^[面白そうなテンプレートがいっぱいありますね。]。
+
+<Figure
+  src="20260124-124015.png"
+  width={600}
+  alt="図の説明"
+  caption="フィルタリングした結果"
+/>
+
+## 初回ダウンロード
+
+選択したワークフローに応じてモデルのダウンロードが必要となります。今回とりあえず FLUX.2 [dev] を試してみました。初回ワークフロー起動時には
+
+<Figure src="20260121-183518.png" width={500} alt="図の説明" />
+
+モデルが足りない旨が表示されるので適宜モデルをダウンロードしてください。保存先は `models` ディレクトリ以下に割り振りました。FLUX.2 を動作させるために必要なファイルは以下の三つでした。
+
+- https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors
+- https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/diffusion_models/flux2_dev_fp8mixed.safetensors
+- https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/text_encoders/mistral_3_small_flux2_bf16.safetensors
+
+```sh
+ComfyUI/models
+├── audio_encoders
+├── checkpoints
+├── clip
+├── clip_vision
+├── configs
+├── controlnet
+├── diffusers
+├── diffusion_models
+├── embeddings
+├── gligen
+├── hypernetworks
+├── latent_upscale_models
+├── loras
+├── model_patches
+├── photomaker
+├── style_models
+├── text_encoders
+├── unet
+├── upscale_models
+├── vae
+└── vae_approx
+```
+
+# 使い方
+
+モデルが揃ったら、テンプレのワークフローをそのまま実行できます。今回は ImageEdit ノードにプロンプトを入れて、家の猫を軽く画像変換してみました。
+
+入力した指示はこれです。
+
+> The cat is wearing a small pale yellow knitted beanie, with a white fabric patch on the front right, embroidered with big gray text “FLUX.2 COMFY.” Keep the face
+
+ポイントは最後の “Keep the face” で、編集タスクでは「元画像の保持条件」を明示したほうが破綻しにくい印象でした。
+
+<Figure
+  src="20260124-125710.png"
+  width={600}
+  alt="図の説明"
+  caption="論文で説明されている Stable Diffusion の概要図"
+/>
+
+# 使ってみた感想（WebUI からの移行目線）
+
+ここからは「まだ数時間〜数日触っただけ」の範囲の感想ですが、率直に良かったところ／気になったところを書きます。
+
+## 良かったところ
+
+1. 何が行われているかが追える
+
+WebUI は便利な反面、「内部で何が起きているか」が見えづらい瞬間があります。ComfyUI はノードがそのまま処理工程なので、詰まった時の切り分けが圧倒的に楽でした。
+
+2. ワークフローがそのまま“設定の完成形”として残る
+
+「この生成結果、どの設定だったっけ？」が起きにくい。ワークフローを保存しておけば、そのまま再現できます。
+
+3. テンプレ起点が強い
+
+ゼロから配線するより、テンプレを動かして差分で学べるのが良かったです。 とりあえず “動く状態” に到達するまでが早い。
+
+## 気になったところ（慣れが必要）
+
+1. 最初はUIの“地図”が頭に入らない
+
+ノードの概念自体は分かっても、どこを触れば何が変わるかは慣れが必要でした。ただ、テンプレをいじっていると徐々に繋がってきます。
+
+2. モデル配置ルールを理解するまでがワンステップ
+
+models/ 以下の分類（vae / diffusion_models / text_encoders など）を理解すると楽ですが、最初は「どこに置くのが正解？」となりがち。このあたりは一度覚えると作業が速くなります。
