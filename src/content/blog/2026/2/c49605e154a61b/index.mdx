@@ -1,0 +1,245 @@
+---
+title: "nnUNetv2 について"
+pubDate: 2026/02/10
+categories: ["機械学習", "医用画像", "セグメンテーション"]
+tags: ["nnUNet"]
+description: "nnUNetv2 を使うための事前準備から、plan_and_preprocess の役割、splits_final.json によるCV分割のカスタム、configurationの読み方、planner/trainer拡張の導入方法までをまとめています。"
+---
+
+# 事前準備
+
+まずnnUNet のコマンドを使用する前に、ユーザー自身が準備する必要のある内容についてまとめます。
+nnUNet では以下の3つのディレクトリ構成を想定しているため、これらを任意の場所に作成し環境変数として指定します。
+
+- `nnUNet_raw`：生データ（学習用画像、ラベル、dataset.json）を配置
+- `nnUNet_preprocessed`：前処理済みデータの配置
+- `nnUNet_results`：学習結果を配置
+
+```sh
+export nnUNet_raw="/path/to/dir"
+export nnUNet_preprocessed="/path/to/dir"
+export nnUNet_results="/path/to/dir"
+```
+
+## nnUNet_raw
+
+生データはデータセットIDと名前付きのディレクトリを作成してそこに配置します。
+
+```sh
+${nnUNet_raw}/
+  Dataset<ID>_<TaskName>/
+    dataset.json
+    imagesTr/ # 学習データ
+    labelsTr/ # ラベルデータ
+    imagesTs/ # テストデータ
+```
+
+ディレクトリ名は以下の命名規則に従います。
+
+- `Dataset<ID>`：ID 部分は任意の番号で、nnUNet はこの番号を参照してデータセットを識別します
+- `TaskName`：人間のための識別用文字列で、任意の文字列を指定可能
+
+### dataset.json
+
+学習用データについてのメタデータを保存します。
+
+```json
+{
+  "channel_names": {
+    "0": "volume"
+  },
+  "labels": {
+    "background": 0,
+    "surface": 1,
+    "ignore": 2
+  },
+  "numTraining": 774,
+  "file_ending": ".tif"
+}
+```
+
+### imagesTr/imagesTs
+
+学習用データは `{CaseID}_{ModalityIndex}` というファイル名を想定します。
+
+- ケースID：サンプルを識別するための番号
+- モダリティID：同じケース（サンプル）に対して、入力チャンネルの識別番号
+
+1チャンネルの画像データであれば、`case1_0000.tif, case2_0000.tif, ...` となり、複数チャンネルであれば、`case1_0000.tif, case1_0001.tif, ..., case2_0000.tif, case2_0001.tif,...` となります。
+
+# 前処理
+
+準備したデータセットに対して、実際の学習で使用するための前処理を掛ける工程について説明します。
+まず、準備したデータセットが正しいフォーマットかどうかを確認するためのコマンドとして、
+
+```sh
+nnUNetv2_plan_and_preprocess -d 701 --verify_dataset_integrity
+```
+
+を使用することができます（`--verify_dataset_integrity` オプションでの起動）。このコマンドでは、ファイル命名規則、チャンネル数、データ破損がないかなどの事前確認を行うことができます。
+
+実際の前処理は以下のコマンドで実行できます。
+
+```sh
+nnUNetv2_plan_and_preprocess -d <dataset_id>
+```
+
+コマンド正常終了後、
+
+```shell
+${nnUNet_preprocessed}/
+  Dataset<ID>_<TaskName>/
+    nnUNetPlans.json        # plan の設定ファイル
+    nnUNetPlans_2d/         # 2D 学習用データ
+    nnUNetPlans_3d_fullres/ # 3D full res 学習用データ
+    nnUNetPlans_3d_lowres/  # 3D lowres 学習用データ
+```
+
+というディレクトリ以下に処理済みのデータ、設定ファイルが格納されます。
+
+## プラン作成
+
+nnUNet では指定したデータセットに対してどのような学習パイプラインを回すべきかを `plan` という形で自動決定してくれます。デフォルトでは [ExperimentPlanner](https://github.com/MIC-DKFZ/nnUNet/blob/273d6147f2d71bafc27a5e1c6fcab9f59ceba7d0/nnunetv2/experiment_planning/experiment_planners/default_experiment_planner.py) が使用され、以下の処理が実行されます。
+
+- target spacing
+- transpose（軸入れ替え）
+- patch_size
+- batch_size
+- UNet の段数・カーネル・ストライドなどのネットワーク構造
+- 正規化方式
+- resampling の関数とパラメータ
+
+これらが自動判定され、最終的な設定ファイルとして
+
+```sh
+${nnUNet_preprocessed}/Dataset<ID>_<TaskName>/nnUNetPlans.json
+```
+
+JSON ファイルを保存します。
+
+### カスタム planner
+
+デフォルトでは `ExperimentPlanner` が使用されるのですが、どういったプランを作成するかについてカスタムすることが可能です。nnUNet リポジトリを editable install して、その中に追加するのが最もシンプルかと思います。
+
+- git clone した nnUNet のコードツリーで作業
+- 自作 planner の .py を nnUNet の所定フォルダ（既存 planner が置いてある場所）に追加
+  - 本記事作成時には `nnUNet/nnunetv2/experiment_planning/experiment_planners/default_experiment_planner.py` にて実装されていました。
+- pip install -e . で editable install
+
+作成したプランナーは
+
+```sh
+nnUNetv2_plan_and_preprocess -d <dataset_id> -pl <planner_name>
+```
+
+として、`-pl` オプションで呼び出すことができます。
+
+## Preprocessing
+
+学習用の画像に対しての前処理を実行します。
+
+- リサンプリング（voxel spacing を揃える）
+- 強度正規化（モダリティや統計に基づいて）
+- ラベルの整形（補間方法、型の調整など）
+- 学習を速く回すためのキャッシュ的な保存（nnUNet が読む形式で保存）
+
+## CV の作成
+
+fold の分割自体も自動でやってくれますが、カスタムのCVを作成したいときは `${nnUNet_preprocessed}/splits_final.json` を作成して記述することになります。例えば
+
+```sh
+case001_0000.nii.gz
+case002_0000.nii.gz
+case003_0000.nii.gz
+case004_0000.nii.gz
+case005_0000.nii.gz
+```
+
+のデータに対して 2-fold CV を作成したい場合は
+
+```json
+[
+  {
+    "train": ["case001", "case002", "case003"],
+    "val": ["case004", "case005"]
+  },
+  {
+    "train": ["case004", "case005"],
+    "val": ["case001", "case002", "case003"]
+  }
+]
+```
+
+というJSON ファイルを作成することで、各 fold で trian/valid どのケースIDの画像を使用するかを指定することができます。
+
+# 学習
+
+前処理済みのデータが作成できたら学習コマンドを実行することができます。
+
+```sh
+nnUNetv2_train <dataset_id> <configuration> <fold>
+```
+
+## configuration について
+
+学習の configuration は、前処理実行時に出力される `nnUNetPlans.json` の中で実装されています。
+
+- `2d`：2Dスライスで学習
+- `3d_fullres`：3Dのフル解像度で学習
+- `3d_lowres`：3Dを低解像度に落として学習
+- `3d_cascade_fullres`：lowres の予測を追加入力として fullres を学習する
+
+例えば `3d_fullres` であれば
+
+```json
+"3d_fullres": {
+    "data_identifier": "nnUNetPlans_3d_fullres",
+    "preprocessor_name": "DefaultPreprocessor",
+    "batch_size": 2,
+    "patch_size": [
+        128,
+        128,
+        128
+    ],
+    "median_image_size_in_voxels": [
+        320.0,
+        314.0,
+        314.0
+    ],
+    "spacing": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "normalization_schemes": [
+        "ZScoreNormalization"
+    ],
+    "use_mask_for_norm": [
+        false
+    ],
+    "resampling_fn_data": "resample_data_or_seg_to_shape",
+    "resampling_fn_seg": "resample_data_or_seg_to_shape",
+    "resampling_fn_data_kwargs": {
+        "is_seg": false,
+        "order": 3,
+        "order_z": 0,
+        "force_separate_z": null
+    },
+    ...
+},
+```
+
+のような設定が `nnUNetPlans.json` に（`nnUNetv2_plan_and_preprocess` コマンドの実行結果として）記述されています。
+
+## trainer について
+
+trainer は nnUNet の学習パイプラインに関するクラスです。
+
+- どのネットワークを作るか（UNet の構成、deep supervision の扱いなど）
+- optimizer / LR scheduler をどうするか
+- loss をどう定義するか
+- dataloader / augmentation をどう設定するか
+- 何epoch、どの頻度で validation、checkpoint をどう保存するか
+- AMP を使うか
+
+などを定義するもので、デフォルトの trainer の他にカスタムした自作の trainer も使用することができます。
