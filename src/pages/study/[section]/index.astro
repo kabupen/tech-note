@@ -1,0 +1,54 @@
+---
+import { getCollection } from "astro:content";
+import AboutHeroImage from "@/assets/blog-placeholder-about.jpg";
+import Layout from "@/layouts/SimplePage.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("study");
+  const sections = Array.from(
+    new Set(entries.map((entry) => entry.id.split("/")[0]))
+  );
+
+  return sections.map((section) => ({
+    params: { section },
+  }));
+}
+
+const { section } = Astro.params;
+const entries = (await getCollection("study"))
+  .filter((entry) => entry.id.startsWith(`${section}/`))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout
+  title={`Study: ${section}`}
+  description=""
+  pubDate={new Date("2025-11-15")}
+  heroImage={AboutHeroImage}
+>
+  <h1>{section}</h1>
+  <p>
+    <a href="/study" class="text-sky-600 hover:underline">Study</a>
+    <span class="mx-2 text-slate-300">/</span>
+    {section}
+  </p>
+
+  {
+    entries.length === 0 ? (
+      <p class="mt-4">このセクションにはまだノートがありません。</p>
+    ) : (
+      <ul class="mt-4 space-y-2">
+        {entries.map((entry) => {
+          const href = `/study/${entry.slug}/`;
+          return (
+            <li>
+              <a href={href} class="text-sky-600 hover:underline">
+                {entry.data.title}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</Layout>

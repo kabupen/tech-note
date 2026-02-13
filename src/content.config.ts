@@ -29,4 +29,21 @@ const blog = defineCollection({
   },
 });
 
-export const collections = { blog };
+const study = defineCollection({
+  loader: glob({ base: "./src/content/study", pattern: "**/*.{md,mdx}" }),
+  schema: () =>
+    z.object({
+      title: z.string(),
+      pubDate: z.coerce.date(),
+      tags: z.array(z.string()).default([]),
+      categories: z.array(z.string()).default([]),
+    }),
+  slug: ({ id, defaultSlug }) => {
+    if (/\/index\.mdx?$/.test(id)) {
+      return id.replace(/\/index\.mdx?$/, "");
+    }
+    return defaultSlug;
+  },
+});
+
+export const collections = { blog, study };

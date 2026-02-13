@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+import AboutHeroImage from "@/assets/blog-placeholder-about.jpg";
+import Layout from "@/layouts/SimplePage.astro";
+
+const studies = await getCollection("study");
+const sections = Array.from(
+  new Set(studies.map((entry) => entry.id.split("/")[0]))
+).sort((a, b) => a.localeCompare(b, "en"));
+---
+
+<Layout
+  title="Study"
+  description=""
+  pubDate={new Date("2025-11-15")}
+  heroImage={AboutHeroImage}
+>
+  <h1>Study</h1>
+  src/content/study 以下のセクション一覧です。
+
+  {
+    sections.length === 0 ? (
+      <p class="mt-4">Study ノートはまだありません。</p>
+    ) : (
+      <ul class="mt-4 space-y-2">
+        {sections.map((section) => (
+          <li>
+            <a href={`/study/${section}/`} class="text-sky-600 hover:underline">
+              {section}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Layout>

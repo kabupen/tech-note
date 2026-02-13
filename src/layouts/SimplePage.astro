@@ -20,6 +20,7 @@ interface Props {
     alt?: string;
   };
   tags?: string[];
+  categories?: string[];
 }
 
 const {
@@ -29,6 +30,7 @@ const {
   updatedDate,
   heroImage,
   tags = [],
+  categories = [],
 } = Astro.props as Props;
 ---
 
@@ -63,6 +65,7 @@ const {
           pubDate={pubDate}
           updatedDate={updatedDate}
           tags={tags}
+          categories={categories}
         />
 
         <BlogContent>

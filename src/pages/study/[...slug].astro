@@ -1,0 +1,27 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import Layout from "@/layouts/SimplePage.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("study");
+  return entries
+    .filter((entry) => !entry.data.draft)
+    .map((entry) => ({
+      params: { slug: entry.slug },
+      props: entry,
+    }));
+}
+
+type Props = CollectionEntry<"study">;
+const entry = Astro.props as Props;
+const { Content } = await render(entry);
+---
+
+<Layout
+  title={entry.data.title}
+  pubDate={entry.data.pubDate}
+  tags={entry.data.tags}
+  categories={entry.data.categories}
+>
+  <Content />
+</Layout>

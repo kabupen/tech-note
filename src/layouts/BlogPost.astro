@@ -166,6 +166,18 @@ const toc: TocItem[] =
               return;
             }
 
+            // 見出しの実DOM（KaTeXを含む）を目次ラベルへ同期する。
+            // markdown 由来の `headings[].text` は数式部分が崩れる場合があるため。
+            headings.forEach((heading) => {
+              const id = heading.id;
+              if (!id) return;
+              const link = tocLinks.get(id);
+              if (!link) return;
+
+              link.innerHTML = heading.innerHTML;
+              link.setAttribute("aria-label", heading.textContent?.trim() ?? "");
+            });
+
             let activeId = null;
 
             const clearActive = () => {
