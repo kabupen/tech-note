@@ -1,0 +1,141 @@
+---
+title: "外出先で mac から Windows へ ssh する"
+pubDate: 2025/12/15
+categories: ["tips"]
+tags: ["Tailscale", "SSH", "Windows", "macOS", "WSL", "RDP"]
+description: "Tailscale を使って、外出先から Mac → Windows へ安全に SSH / リモートデスクトップ接続する手順まとめ"
+---
+
+# はじめに
+
+外出先（ホテル / カフェ / テザリング等）から、自宅や職場に置いた Windows マシンへ安全に接続したいことありませんか？
+インターネットへ SSH（22番）や RDP（3389番）をポート開放する運用は避けたいので、本記事では **Tailscale（WireGuard ベースのメッシュ VPN）** を使って、次を構築します。
+
+- Mac → Windows へ **SSH**
+- 必要なら Mac → Windows へ **リモートデスクトップ（Windows App）**
+
+構成のイメージはこうです。
+
+- Mac / Windows の両方に Tailscale を入れて同じ tailnet に参加
+- 通信は tailnet 内のプライベート IP（100.x.y.z）や MagicDNS 名で行う
+- SSH は Windows 側で OpenSSH Server を有効化して受ける
+  - WSL に入りたい場合も、まず Windows に SSH してから `wsl` で入るのがシンプル
+
+---
+
+# Tailscale のインストール
+
+## Windows 側の作業
+
+まず、Windows に Tailscale をインストールします。公式サイト（[https://tailscale.com/download）から](https://tailscale.com/download）から) Windows 版をダウンロードしてインストールしてください。
+インストール後、起動してログインします（Google / GitHub / Microsoft 等）。同じ tailnet に Mac も参加させるため、同じアカウント（または同じ組織の tailnet）でログインします。
+
+Tailscale の管理画面、または Windows の Tailscale クライアント上で **100.x.y.z** の IP が表示されます。この IP が外出先から接続するときの宛先になります。
+
+## mac 側の作業
+
+mac にも Tailscale をインストールします。インストールした後、「立ち上がらないな、、、」と思っていたら、右上にアイコンとして起動していた感じでした（気づかずちょっとハマりました）。ネットワーク接続後（Tailscale 起動後）、mac から Windows の IP アドレスに ping が通るようになります。
+
+```sh
+ping 100.xxx.xxx.xxx
+```
+
+レスポンスが返ってくるようになれば、tailnet 内の疎通は OK です。
+
+# OpenSSH Server
+
+## Windows 側の作業
+
+Windows に **OpenSSH Server** を入れて、`sshd` を起動します。Windows 11 の場合（GUI）:
+
+1. 設定 → **アプリ** → **オプション機能**
+2. **機能を追加** を開く
+3. **OpenSSH Server** を追加してインストール
+
+PowerShell（管理者）でも可能です：
+
+```powershell
+# OpenSSH Server を追加
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+```
+
+sshd サービスの起動と自動起動を設定しておきます。
+
+```powershell
+# サービス起動
+Start-Service sshd
+
+# 自動起動に
+Set-Service -Name sshd -StartupType Automatic
+
+# 状態確認
+Get-Service sshd
+```
+
+また、Windows ファイアウォール（受信 22 番）の許可を実施します。
+通常は OpenSSH Server のインストール時に規則が追加されますが、うまくいかない場合は明示的に許可します。
+
+```powershell
+New-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+```
+
+## mac 側の作業
+
+まずはパスワードで入れる状態を確認します。
+
+```sh
+ssh your_windows_user@100.xxx.xxx.xxx
+```
+
+初回はホスト鍵確認が出るので `yes`。ログインできれば SSH 経路は完成です。
+
+# 鍵認証にする
+
+外出先運用では、パスワードより鍵認証が扱いやすく安全です。
+
+## mac 側の作業
+
+```sh
+ssh-keygen -t ed25519 -C "mac-to-windows"
+```
+
+`~/.ssh/id_ed25519` と `~/.ssh/id_ed25519.pub` ができます。
+
+## Windows 側の作業
+
+Windows の OpenSSH は、ユーザーごとの `authorized_keys` を見に行きます。基本は以下に配置します。
+
+- `C:\Users\<ユーザー名>\.ssh\authorized_keys`
+
+手順例：
+
+1. Windows 側で `.ssh` フォルダ作成（なければ）
+2. Mac の公開鍵内容（`id_ed25519.pub`）を `authorized_keys` に追記
+
+Mac で公開鍵を表示：
+
+```sh
+cat ~/.ssh/id_ed25519.pub
+```
+
+それを Windows の `authorized_keys` に貼り付けます（改行区切りで1行として）。
+
+---
+
+# WSL の設定
+
+WSL2 は VM 的に別 IP を持つため、Windows 側でポート転送（portproxy）する設定にしておきます。
+大まかな流れ：
+
+1. WSL 側で `sshd` を起動（Ubuntu なら `sudo apt install openssh-server` → `sudo service ssh start`）
+2. Windows 側で `netsh interface portproxy` で 22 を WSL の IP:22 に転送
+3. Windows ファイアウォールで 22 を許可
+
+# まとめ
+
+- Tailscale を使うと、外出先からでも **ポート開放なし** に Mac → Windows を安全に扱える
+- SSH は Windows の OpenSSH Server を使うのが最短
+- WSL に入りたいだけなら「Windows に SSH → `wsl`」が運用しやすい
+- GUI が必要なら Windows App（RDP）も Tailscale IP でそのまま通る
+
+この構成にしておくと、出先で「ちょっと Windows の作業環境を使いたい」がかなり楽になります。
