@@ -1,14 +1,10 @@
-+++
-title = 'mixup: Beyond Empirical Risk Minimization'
-date = 2024-03-06T09:58:44+09:00
-draft = false
-math = true
-categories = ["arxiv"]
-tags = []
-toc = true
-+++
-
-
+---
+title: "mixup: Beyond Empirical Risk Minimization"
+pubDate: 2024-03-06T09:58:44+09:00
+categories: ["arxiv"]
+tags: []
+description: ""
+---
 ## Introduction
 
 ニューラルネットワークの学習が成功している要因として、本論文中では empirical risk minimization（経験的損失最小化; ERM）とモデルサイズとデータサイズが比例している関係にあることを挙げています。

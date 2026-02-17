@@ -1,14 +1,10 @@
-+++
-title = 'Learning Transferable Visual Models From Natural Language Supervision'
-date = 2024-02-21T09:17:53+09:00
-draft = false
-math = true
-tags = []
-categories = ["arxiv"]
-toc = true
-+++
-
-
+---
+title: "Learning Transferable Visual Models From Natural Language Supervision"
+pubDate: 2024-02-21T09:17:53+09:00
+categories: ["arxiv"]
+tags: []
+description: ""
+---
 ## Abstract
 
 

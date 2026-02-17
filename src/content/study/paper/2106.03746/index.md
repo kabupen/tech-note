@@ -1,14 +1,10 @@
-+++
-title = 'Efficient Training of Visual Transformers with Small Datasets'
-date = 2024-03-05T19:28:32+09:00
-draft = false
-math = true
-categories = ["arxiv"]
-tags = ["Vision Transformer"]
-toc = true
-+++
-
-
+---
+title: "Efficient Training of Visual Transformers with Small Datasets"
+pubDate: 2024-03-05T19:28:32+09:00
+categories: ["arxiv"]
+tags: ["Vision Transformer"]
+description: ""
+---
 ## Introduction
 
 Visual Transformer（VTs）[^1]は従来画像処理で使用されていた CNN とは異なった構造を持っているモデルであり、様々なタスクで成功を収めています。VTs ではパッチ分割しそれらを embedding し、トークンとして扱うことで、自然言語タスクで用いられている Transformer を画像処理にも応用することを可能にしています。

@@ -1,12 +1,10 @@
-+++
-title = '8939412e0f91c2'
-date = 2025-06-06T08:44:45+09:00
-draft = false
-categories = []
-tags = []
-+++
-
-
+---
+title: "8939412e0f91c2"
+pubDate: 2025-06-06T08:44:45+09:00
+categories: []
+tags: []
+description: ""
+---
 # 電磁気法則一覧
 
 

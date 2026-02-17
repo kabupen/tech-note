@@ -1,14 +1,10 @@
-+++
-title = 'Neural Network Diffusion'
-date = 2024-02-22T11:08:43+09:00
-draft = false
-math = true
-tags = ["Diffusion model"]
-categories = ["arxiv"]
-toc = true
-+++
-
-
+---
+title: "Neural Network Diffusion"
+pubDate: 2024-02-22T11:08:43+09:00
+categories: ["arxiv"]
+tags: ["Diffusion model"]
+description: ""
+---
 ## Abstract
 
 画像生成などで成功している Diffusion model を用いて、ニューラルネットワークのパラメータを決定する手法を紹介しています。

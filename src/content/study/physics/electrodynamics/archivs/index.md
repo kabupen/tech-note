@@ -1,13 +1,10 @@
-+++
-title = '電磁気学'
-date = 2024-03-05
-draft = true
-math = true
-tags = []
-categories = ["物理"]
-toc = true
-+++
-
+---
+title: "電磁気学"
+pubDate: 2024-03-05
+categories: ["物理"]
+tags: []
+description: ""
+---
 # 電磁気学
 
 ## 「理論電磁気学」（砂川重信）

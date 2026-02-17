@@ -1,14 +1,10 @@
-+++
-title = 'Box It to Bind It: Unified Layout Control and Attribute Binding in T2I Diffusion Models'
-date = 2024-03-04T09:51:58+09:00
-draft = false
-math = true
-tags = []
-categories = []
-toc = true
-+++
-
-
+---
+title: "Box It to Bind It: Unified Layout Control and Attribute Binding in T2I Diffusion Models"
+pubDate: 2024-03-04T09:51:58+09:00
+categories: []
+tags: []
+description: ""
+---
 ## Introduction
 
 

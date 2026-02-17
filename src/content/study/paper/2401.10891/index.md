@@ -1,16 +1,10 @@
-+++
-title = 'Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data'
-date = 2024-01-26
-draft = false
-math = true
-tags = ["Stable Diffusion"]
-categories = ["arxiv"]
-toc = false
-image = "20240217-191535.png"
-+++
-
-
-
+---
+title: "Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data"
+pubDate: 2024-01-26
+categories: ["arxiv"]
+tags: ["Stable Diffusion"]
+description: ""
+---
 # Abstract
 
 データ収集を自動化することで大規模データの収集に成功した。

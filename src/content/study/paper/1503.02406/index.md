@@ -1,13 +1,10 @@
-+++
-title = 'Deep Learning and the Information Bottleneck Principle'
-date = 2024-02-27T11:01:52+09:00
-draft = false 
-math = true
-tags = []
-categories = ["arxiv"]
-toc = true
-+++
-
+---
+title: "Deep Learning and the Information Bottleneck Principle"
+pubDate: 2024-02-27T11:01:52+09:00
+categories: ["arxiv"]
+tags: []
+description: ""
+---
 ## はじめに
 
 [YOLOv9](https://arxiv.org/pdf/2402.13616.pdf) の "§3.1 Information Bottleneck Principle" でも議論されている内容であり、自分にとっては初出であったためまとめてみました。

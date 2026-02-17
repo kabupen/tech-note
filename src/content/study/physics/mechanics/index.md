@@ -1,13 +1,10 @@
-+++
-title = '20240305'
-date = 2024-03-05T18:21:02+09:00
-draft = true
-math = true
-tags = []
-categories = ["物理"]
-toc = false
-+++
-
+---
+title: "20240305"
+pubDate: 2024-03-05T18:21:02+09:00
+categories: ["物理"]
+tags: []
+description: ""
+---
 ## 古典力学（ゴールドスタイン）
 
 ### 第１章 基本的原理の概観

@@ -1,14 +1,10 @@
-+++
-title = 'You Only Need One Step: Fast Super-Resolution with Stable Diffusion via Scale Distillation'
-date = 2024-02-16T00:54:54+09:00
-draft = false
-math = true
-tags = ["Stable Diffusion"]
-categories = ["arxiv"]
-toc = false
-+++
-
-
+---
+title: "You Only Need One Step: Fast Super-Resolution with Stable Diffusion via Scale Distillation"
+pubDate: 2024-02-16T00:54:54+09:00
+categories: ["arxiv"]
+tags: ["Stable Diffusion"]
+description: ""
+---
 # 論文情報
 
 - [You Only Need One Step: Fast Super-Resolution with Stable Diffusion via Scale Distillation](https://arxiv.org/pdf/2401.17258.pdf)

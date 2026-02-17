@@ -1,14 +1,10 @@
-+++
-title = 'Sampling Generative Networks'
-date = 2024-03-23T23:29:58+09:00
-draft = false
-math = true
-categories = ["arxiv"]
-tags = ["VAE"]
-toc = true
-+++
-
-
+---
+title: "Sampling Generative Networks"
+pubDate: 2024-03-23T23:29:58+09:00
+categories: ["arxiv"]
+tags: ["VAE"]
+description: ""
+---
 ## Introduction
 
 Generative models はニューラルネットワークで表現することができるもので、データセットと同質のサンプルを生成することができるように学習されたものです。generative models ではデータセットを効果的に（圧縮して）表現することのできる latent space を学習しているため、データセットを生成するために latent space からのサンプリング結果を用いることもできます。また latent space では意味を持った数学的処理（semantic operations）も可能です。

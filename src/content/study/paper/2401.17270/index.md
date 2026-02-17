@@ -1,15 +1,10 @@
-+++
-title = 'YOLO-World: Real-Time Open-Vocabulary Object Detection'
-date = 2024-02-20T10:39:08+09:00
-draft = false
-math = true
-tags = []
-categories = []
-toc = true
-image = "yolo_logo.png"
-+++
-
-
+---
+title: "YOLO-World: Real-Time Open-Vocabulary Object Detection"
+pubDate: 2024-02-20T10:39:08+09:00
+categories: []
+tags: []
+description: ""
+---
 ## Abstract
 
 open vocaburary で物体検知ができるというモデルです。

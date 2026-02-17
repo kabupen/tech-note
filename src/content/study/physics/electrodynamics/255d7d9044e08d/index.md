@@ -1,11 +1,10 @@
-+++
-title = '255d7d9044e08d'
-date = 2025-05-24T08:49:33+09:00
-draft = false
-categories = []
-tags = []
-+++
-
+---
+title: "255d7d9044e08d"
+pubDate: 2025-05-24T08:49:33+09:00
+categories: []
+tags: []
+description: ""
+---
 # 数学的準備
 
 ## ベクトル

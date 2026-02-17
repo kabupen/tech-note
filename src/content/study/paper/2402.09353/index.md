@@ -1,14 +1,10 @@
-+++
-title = 'DoRA: Weight-Decomposed Low-Rank Adaptation'
-date = 2024-02-19T14:18:49+09:00
-draft = false
-math = true
-tags = []
-categories = []
-toc = true
-+++
-
-
+---
+title: "DoRA: Weight-Decomposed Low-Rank Adaptation"
+pubDate: 2024-02-19T14:18:49+09:00
+categories: []
+tags: []
+description: ""
+---
 ## Introduction
 
 Full fine tuning（FT）は近年の大規模モデルではその計算コストの大きさが問題となってきています。そこで parameter-efficient fine-tuning（PEFT）と括られるような fine-tuning 手法が発展してきており、LoRA などもその手法の一種です。LoRA ではモデル構造を変えることなく少ないパラメータ数にもかかわらず高精度な fine-tuning が可能な手法で、様々な派生手法が発展しています。

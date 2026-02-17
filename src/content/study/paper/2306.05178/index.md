@@ -1,14 +1,10 @@
-+++
-title = 'SyncDiffusion: Coherent Montage via Synchronized Joint Diffusions'
-date = 2024-01-25
-draft = false
-math = true
-tags = ["Stable Diffusion"]
-categories = ["arxiv"]
-toc = false
-+++
-
-
+---
+title: "SyncDiffusion: Coherent Montage via Synchronized Joint Diffusions"
+pubDate: 2024-01-25
+categories: ["arxiv"]
+tags: ["Stable Diffusion"]
+description: ""
+---
 - [SyncDiffusion: Coherent Montage via Synchronized Joint Diffusions](https://arxiv.org/abs/2306.05178)
 
 # Abstract
