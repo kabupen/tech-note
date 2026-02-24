@@ -60,3 +60,11 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 ## Credit
 
 This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+
+# URL について
+
+`/blog` ってちょっとださい、一般的じゃないんじゃないかと思うけど。
+
+- /blog
+  - https://cloud.google.com/blog/?hl=en Google も /blog 以下に /products, などを切っている
+  - https://developers.cyberagent.co.jp/blog/
