@@ -1,0 +1,613 @@
+---
+title: "カルマンフィルタについて"
+pubDate: 2026/03/12
+categories: ["確率", "ロボティクス"]
+tags: ["カルマンフィルタ"]
+description: ""
+---
+
+線形ガウス系に対するベイズフィルタの厳密解であるカルマンフィルタについてまとめます。ロボティクス、制御、信号処理、時系列推定など、非常に広い分野で使われています。
+本記事では、カルマンフィルタをベイズフィルタの立場から捉え直し、前提、意味、更新式、そして導出までを教科書に近い丁寧さで整理します。数式の見た目だけを追うのではなく、各式が何をしているのかも併せて説明します。
+
+# カルマンフィルタが扱う問題
+
+カルマンフィルタは、時刻とともに変化する隠れ状態 $x_t$ を、制御入力 $u_t$ と観測 $z_t$ から逐次推定する方法です。
+ここでいう状態とは、推定したい内部変数をまとめたベクトルです。例えば移動ロボットなら、位置、速度、姿勢、角速度などをまとめて状態に含めます。
+
+カルマンフィルタでは、各時刻の信念を確率分布
+
+$$
+bel(x_t) = p(x_t \mid z_{1:t}~u_{1:t})
+$$
+
+として扱います。これは、時刻 $t$ までの観測列 $z_{1:t}$ と制御列 $u_{1:t}$ をすべて使ったときの状態 $x_t$ の事後分布です。
+
+ベイズフィルタの一般形では、この信念は次の 2 段階で更新されます。
+
+（１）予測
+
+$$
+\overline{bel}(x_t)
+= \int p(x_t \mid u_t~x_{t-1})~bel(x_{t-1})~dx_{t-1}
+$$
+
+（２）観測更新
+
+$$
+bel(x_t)
+= \eta~p(z_t \mid x_t)~\overline{bel}(x_t)
+$$
+
+この一般式はそのままでは実際に計算できないことが多いです。そこで、特別な仮定のもとでこのベイズフィルタを厳密かつ効率的に計算するのがカルマンフィルタです。
+
+# 前提
+
+カルマンフィルタが厳密に成立するためには、3 つの仮定が必要です。
+
+### 1. 初期信念がガウス分布であること
+
+初期状態に対する信念がガウス分布であるとします。
+
+$$
+bel(x_0) = \mathcal{N}(x_0~;~\mu_0~\Sigma_0)
+$$
+
+ここで $\mu_0$ は初期平均、$\Sigma_0$ は初期共分散です。
+
+### 2. 状態遷移が線形ガウスであること
+
+状態遷移確率 $p(x_t \mid u_t, x_{t-1})$ が線形であり、ガウスノイズが加算されている形である必要があります。これはつまり、状態遷移モデルが
+
+$$
+x_t = A_t x_{t-1} + B_t u_t + \varepsilon_t
+$$
+
+と表されることを意味します。ここで
+
+- $x_t$ は $n$ 次元の状態ベクトル、$u_t$ は $m$ 次元の状態ベクトル
+- $A_t$ は状態遷移行列（$n\times n$の正方行列）
+- $B_t$ は制御入力行列（$n \times m$ の行列）
+- $\varepsilon_t$ は平均 $0$、共分散 $R_t$ のガウスノイズ
+
+です。ここで補足ですが、$x_t$ と $u_t$ をそのまま足しているのではないです。$B_t$ は制御入力 $u_t$ を状態空間へ写し、その結果として生じる状態変化を表します。
+例えばモータ指令は位置や姿勢そのものではありませんが、その指令がどのように状態変化へ寄与するかを $B_t$ が表現します。
+
+したがって状態遷移確率は
+
+$$
+p(x_t \mid u_t, x_{t-1})
+= \mathcal{N}(x_t, A_t x_{t-1} + B_t u_t, R_t)
+$$
+
+となります。
+
+### 3. 観測モデルが線形ガウスであること
+
+観測確率 $p(z_t \mid x_t)$ もまた、線形でガウスノイズが加算されている形である必要があります。観測モデルを
+
+$$
+z_t = C_t x_t + \delta_t
+$$
+
+とします。ここで
+
+- $C_t$ は観測行列
+- $\delta_t$ は平均 $0$、共分散 $Q_t$ のガウス雑音
+
+です。したがって観測確率が
+
+$$
+p(z_t \mid x_t)
+= \mathcal{N}(z_t~;~C_t x_t~Q_t)
+$$
+
+と表されることが必要になります。
+
+# カルマンフィルタの導出
+
+では実際にカルマンフィルタを導出していきたいと思います。先ほどの仮定も改めて下記で必要に応じて導入していきます。
+
+## 予測ステップ
+
+まず $\overline{bel}(x_{t})$ に線形ガウス系を当てはめることから考えます。
+
+### 予測分布
+
+予測 belief は現時刻での観測 $z_t$ を取り込む前の
+
+$$
+\overline{bel}(x_{t}) = p(x_t | z_{1:t-1}, u_{1:t})
+$$
+
+です。belief などについては
+
+<BlogPostCard slug="a46644b8087e64" />
+
+の記事も参考にしてみてください。
+
+$$
+\begin{aligned}
+\overline{bel}(x_{t}) &= p(x_t | z_{1:t-1}, u_{1:t}) \\
+&= \int p(x_t \mid x_{t-1},z_{1:t-1},u_{1:t}) p(x_{t-1} \mid z_{1:t-1},u_{1:t}) dx_{t-1} \\
+&= \int p(x_t \mid x_{t-1},u_t) p(x_{t-1} \mid z_{1:t-1},u_{1:t-1}) dx_{t-1}
+\end{aligned}
+$$
+
+マルコフ性（状態 $x$ が完全であること）から観測 $z_{1:t-1}$ には依存しないため
+
+$$
+p(x_t \mid x_{t-1},z_{1:t-1},u_{1:t}) = p(x_t \mid x_{t-1},u_t)
+$$
+
+が成り立つこと、$x_{t-1}$ では未来側にある $u_{t}$ には依存しないため
+
+$$
+p(x_{t-1} \mid z_{1:t-1},u_{1:t}) = p(x_{t-1} \mid z_{1:t-1},u_{1:t-1})
+$$
+
+が成り立つことを用いて3行目の変換を行いました。以上より、予測 belief $\overline{bel}(x_t)$ は、
+
+$$
+\begin{aligned}
+\overline{bel}(x_{t}) &= p(x_t | z_{1:t-1}, u_{1:t}) \\
+&= \int p(x_t \mid x_{t-1},u_t) ~ bel(x_{t-1}) ~dx_{t-1}
+\end{aligned}
+$$
+
+と、前時刻を含んだ再帰的な形で表せます。
+
+### 線形ガウス系の適用
+
+ここまでは線形ガウス系を想定しておらず一般的な議論でしたが、ここからはカルマンフィルタで想定する系について考えていきます。
+カルマンフィルタで想定する問題では、状態遷移を
+
+$$
+x_t = A_t x_{t-1} + B_t u_t + \varepsilon_t
+$$
+
+ノイズを
+
+$$
+\varepsilon_t \sim \mathcal{N}(0,R_t)
+$$
+
+と置きます。このとき遷移確率は
+
+$$
+p(x_t \mid x_{t-1},u_t)
+=
+\mathcal{N}(x_t;A_t x_{t-1}+B_t u_t,R_t)
+$$
+
+前時刻 belief もガウスとして
+
+$$
+bel(x_{t-1})
+=
+\mathcal{N}(x_{t-1};\mu_{t-1},\Sigma_{t-1})
+$$
+
+となります。いま状態遷移において
+
+$$
+A_t x_{t-1} + B_t u_t
+$$
+
+は既知の定数で、この状態遷移 $x_{t-1}\to x_t$ がガウスノイズ $\varepsilon_t$ によってふらつくことを想定しています。そのため、$\varepsilon_t$ が平均 $0$ 分散 $R_t$ のガウス分布に従っていてそれが定数分だけ平均がずれる形になっているので、
+遷移確率がすぐに計算できている（単にガウス分布の平行移動で表されている）ということです。
+
+これらを用いると
+
+$$
+\overline{bel}(x_t)
+=
+\int
+\mathcal{N}(x_t;A_t x_{t-1}+B_t u_t,R_t)
+\mathcal{N}(x_{t-1};\mu_{t-1},\Sigma_{t-1})
+\,dx_{t-1}
+$$
+
+です。いま $x_t$ 自体は
+
+$$
+x_t = A_t x_{t-1} + B_t u_t + \varepsilon_t
+$$
+
+のように、ガウス分布に従う確率変数の線形変換とその和になっているので、ガウス分布に従います。そのため $\overline{bel}(x_t)$ もガウス分布に従います^[積分計算を進めると同様の結果が得られますが別の機会に...。]。
+
+### 平均と共分散
+
+平均の予測は
+
+$$
+\begin{aligned}
+\mathbb{E}[x_t] &= \mathbb{E}[A_t x_{t-1} + B_t u_t + \varepsilon_t] \\
+&= A_t\mathbb{E}[x_{t-1}] + B_t u_t + \mathbb{E}[\varepsilon_t] \\
+&= A_t\mu_{t-1}+B_tu_t
+\end{aligned}
+$$
+
+より、
+
+$$
+\bar{\mu}_t = A_t \mu_{t-1} + B_t u_t
+$$
+
+です。
+
+共分散の予測は
+
+$$
+\begin{aligned}
+\overline{\Sigma_t} \equiv \mathrm{Cov}(x_t)
+&=
+\mathbb{E}
+\left[
+(x_t-\overline{\mu}_t)(x_t-\overline{\mu}_t)^\top
+\right] \\
+&=
+\mathbb{E}
+\left[
+\left(A_t(x_{t-1}-\mu_{t-1})+\varepsilon_t\right)
+\left(A_t(x_{t-1}-\mu_{t-1})+\varepsilon_t\right)^\top
+\right] \\
+&= ... \\
+&= A_t\Sigma_{t-1}A_t^\top + R_t
+\end{aligned}
+$$
+
+となります^[すいません、途中式はいつか加筆します。]。
+
+## 更新ステップ
+
+### 状態 $x_t$ の事後分布
+
+$z_t$ を新しい観測として、条件 $z_{1:t-1},u_{1:t}$ のもとでベイズの定理を使うと
+
+$$
+\begin{aligned}
+p(x_t \mid z_{1:t},u_{1:t})
+&=
+\frac{
+p(z_t \mid x_t,z_{1:t-1},u_{1:t})~
+p(x_t \mid z_{1:t-1},u_{1:t})
+}{
+p(z_t \mid z_{1:t-1},u_{1:t})
+}\\
+&= \frac{
+p(z_t \mid x_t)~
+p(x_t \mid z_{1:t-1},u_{1:t})
+}{
+p(z_t \mid z_{1:t-1},u_{1:t})
+}\\
+\Leftrightarrow
+bel(x_t)
+&=
+\frac{
+p(z_t \mid x_t)\,\overline{bel}(x_t)
+}{
+p(z_t \mid z_{1:t-1},u_{1:t})
+}
+= \eta~p(z_t \mid x_t)\,\overline{bel}(x_t)
+\end{aligned}
+$$
+
+以上から状態 $x_t$ の事後分布は
+
+$$
+bel(x_t) = \eta~p(z_t \mid x_t)\,\overline{bel}(x_t)
+$$
+
+となります。
+
+- $\overline{bel}(x_t)$ は予測分布
+- $p(z_t \mid x_t)$ は観測尤度
+- $\eta$ は正規化定数
+
+です。
+この式は、予測と観測を掛け合わせて、より確からしい状態分布に更新していることを意味します。
+
+### 計算１：予測分布について
+
+以上の事後分布の導出は一般的なもので、ここからカルマンフィルタでの考え方を見ていきます。
+まず予測ステップの結果として、状態 $x_t$ の予測分布がガウス分布で与えられているとします。
+
+$$
+\overline{bel}(x_t)
+=
+\mathcal{N}(x_t;\overline{\mu}_t,\overline{\Sigma}_t)
+$$
+
+これは、時刻 $t$ の観測 $z_t$ をまだ見ていない段階で、状態がどのあたりにありそうかを表しています。
+
+### 計算2：観測モデルについて
+
+次に、観測が状態からどのように生成されるかを表す観測モデルを導入します。
+線形ガウスモデルでは、観測も予測時と同様にガウスノイズのふらつきをもっていることを仮定します。
+
+$$
+z_t = C_t x_t + \delta_t
+$$
+
+$$
+\delta_t \sim \mathcal{N}(0,Q_t)
+$$
+
+したがって尤度は
+
+$$
+p(z_t \mid x_t)
+=
+\mathcal{N}(z_t;C_t x_t,Q_t)
+$$
+
+です。
+
+### 計算3：ベイズ更新式へ代入
+
+予測分布と観測尤度を用いると
+
+$$
+\begin{aligned}
+bel(x_t) & =\eta~p(z_t \mid x_t)\,\overline{bel}(x_t) \\
+&=
+\eta~
+\mathcal{N}(z_t;C_t x_t,Q_t)\,
+\mathcal{N}(x_t;\overline{\mu}_t,\overline{\Sigma}_t)
+\end{aligned}
+$$
+
+となり、事後分布 $bel(x_t)$ はガウス分布の積の形で表されます。この式計算を追っていきます。事後分布は
+
+$$
+bel(x_t)=\eta~\exp(-J_t)
+$$
+
+$$
+J_t
+=
+\frac{1}{2}(z_t-C_t x_t)^\top Q_t^{-1}(z_t-C_t x_t)
++
+\frac{1}{2}(x_t-\overline{\mu}_t)^\top \overline{\Sigma}_t^{-1}(x_t-\overline{\mu}_t)
+$$
+
+と書き表せます。この $J_t$ は、$x_t$ に関する二次式です。したがって、$bel(x_t)$ は $x_t$ に関するガウス分布になります。ここが更新ステップの数学的な核心で、予測分布も観測尤度もガウスであるため、その積もまたガウス分布に従います。
+
+### 更新後の共分散
+
+ガウス分布では、指数部の二次項の係数が共分散の逆行列に対応します。したがって、$J_t$ を $x_t$ について 2 回微分すると、更新後共分散の逆行列が得られます。まず 1 回微分すると
+
+$$
+\frac{\partial J_t}{\partial x_t}
+=
+-C_t^\top Q_t^{-1}(z_t-C_t x_t)
++
+\overline{\Sigma}_t^{-1}(x_t-\overline{\mu}_t)
+$$
+
+さらに 2 回微分すると
+
+$$
+\frac{\partial^2 J_t}{\partial x_t^2}
+=
+C_t^\top Q_t^{-1}C_t
++
+\overline{\Sigma}_t^{-1}
+$$
+
+です。
+
+よって更新後の共分散は
+
+$$
+\Sigma_t
+=
+\left(
+C_t^\top Q_t^{-1}C_t
++
+\overline{\Sigma}_t^{-1}
+\right)^{-1}
+$$
+
+となります。
+
+### 更新後の平均
+
+次に、更新後平均 $\mu_t$ を求めます。ガウス分布の平均は指数部 $J_t$ を最小にする点なので、
+
+$$
+\frac{\partial J_t}{\partial x_t}=0
+$$
+
+を満たす $x_t$ が更新後平均になります。したがって
+
+$$
+-C_t^\top Q_t^{-1}(z_t-C_t \mu_t)
++
+\overline{\Sigma}_t^{-1}(\mu_t-\overline{\mu}_t)=0
+$$
+
+すなわち
+
+$$
+C_t^\top Q_t^{-1}(z_t-C_t \mu_t)
+=
+\overline{\Sigma}_t^{-1}(\mu_t-\overline{\mu}_t)
+$$
+
+です。この式を整理すると
+
+$$
+\mu_t
+=
+\overline{\mu}_t
++
+\Sigma_t C_t^\top Q_t^{-1}(z_t-C_t\overline{\mu}_t)
+$$
+
+が得られます。ここで現れる
+
+$$
+z_t-C_t\overline{\mu}_t
+$$
+
+は観測残差と呼ばれます。予測された観測値 $C_t\overline{\mu}_t$ と実際の観測 $z_t$ のずれです。
+
+### カルマンゲインの導入
+
+ここで
+
+$$
+K_t
+=
+\overline{\Sigma}_t C_t^\top
+\left(
+C_t\overline{\Sigma}_t C_t^\top + Q_t
+\right)^{-1}
+$$
+
+をカルマンゲインと定義すると、更新式はより見通しのよい形になります。更新後の平均は
+
+$$
+\mu_t
+=
+\overline{\mu}_t
++
+K_t(z_t-C_t\overline{\mu}_t)
+$$
+
+更新後の共分散は
+
+$$
+\Sigma_t
+=
+(I-K_t C_t)\overline{\Sigma}_t
+$$
+
+と書けます。
+
+この形を見ると、更新ステップは
+
+- 予測平均 $\overline{\mu}_t$ を出発点にして
+- 観測残差 $z_t-C_t\overline{\mu}_t$ を
+- カルマンゲイン $K_t$ で重み付けして補正する
+
+操作だと分かります。
+
+## 全体の流れ
+
+ここまでで細々とした計算など（だいぶと省略もしましたが）を見てきて、木を見て森を見ず状態になりつつあるので最後にカルマンフィルター全体の流れを再度見ておきたいと思います。
+
+カルマンフィルタは各時刻で
+
+- 予測ステップ
+- 観測ステップ
+
+を順番に繰り返して、状態の確率分布を更新していく方法です。
+
+## 予測ステップ
+
+別で定義した $bel(x_0)$ を出発点として再帰的に時刻 $t-1$ の分布が計算できているという状況を考え、時刻 $t-1$ までで、前時刻の状態についての
+
+$$
+bel(x_{t-1})
+=
+\mathcal{N}(x_{t-1};\mu_{t-1},\Sigma_{t-1})
+$$
+
+を持っているとします。線形ガウスモデルでは運動モデルが
+
+$$
+x_t = A_t x_{t-1} + B_t u_t + \varepsilon_t
+$$
+
+$$
+\varepsilon_t \sim \mathcal{N}(0,R_t)
+$$
+
+であるため、予測分布 $\overline{bel}(x_t)$ もガウス分布に従います。
+
+$$
+\overline{bel}(x_t)
+=
+\mathcal{N}(x_t;\overline{\mu}_t,\overline{\Sigma}_t)
+$$
+
+$$
+\overline{\mu}_t = A_t\mu_{t-1}+B_tu_t
+$$
+
+$$
+\overline{\Sigma}_t = A_t\Sigma_{t-1}A_t^\top + R_t
+$$
+
+以上より、予測ステップを終えると
+
+$$
+\overline{bel}(x_t)
+$$
+
+が計算できます。
+
+## 更新ステップ
+
+ベイズの定理から
+
+$$
+bel(x_t)=\eta~p(z_t \mid x_t)\,\overline{bel}(x_t)
+$$
+
+です。予測分布 $\overline{bel}(x_t)$ は先ほど求めました。
+
+観測モデルもガウスノイズが加算される形式を仮定して
+
+$$
+z_t = C_t x_t + \delta_t
+$$
+
+$$
+\delta_t \sim \mathcal{N}(0,Q_t)
+$$
+
+$$
+p(z_t \mid x_t)
+=
+\mathcal{N}(z_t;C_t x_t,Q_t)
+$$
+
+この関係式を用いると、結果として更新後の分布
+
+$$
+\begin{aligned}
+bel(x_t)
+&=\eta~p(z_t \mid x_t)\,\overline{bel}(x_t) \\
+&=\mathcal{N}(x_t;\mu_t,\Sigma_t)
+\end{aligned}
+$$
+
+が得られます。各パラメーターは
+
+$$
+K_t
+=
+\overline{\Sigma}_t C_t^\top
+\left(
+C_t\overline{\Sigma}_t C_t^\top + Q_t
+\right)^{-1}
+$$
+
+$$
+\mu_t
+=
+\overline{\mu}_t
++
+K_t(z_t-C_t\overline{\mu}_t)
+$$
+
+$$
+\Sigma_t
+=
+(I-K_t C_t)\overline{\Sigma}_t
+$$
+
+です。
