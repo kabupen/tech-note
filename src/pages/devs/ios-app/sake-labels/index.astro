@@ -1,0 +1,22 @@
+---
+import Layout from "@/layouts/SimplePage.astro";
+import AboutHeroImage from "@/assets/blog-placeholder-about.jpg"; // 適当な画像に差し替え
+---
+
+<Layout
+  title="サケラベル"
+  description=""
+  pubDate={new Date("2025/11/16")}
+  heroImage={AboutHeroImage}
+>
+  <ul class="mt-4 space-y-2">
+    <li>
+      <a
+        href="/devs/ios-app/sake-labels/privacy-policy"
+        class="text-sky-600 hover:underline"
+      >
+        プライバシーポリシー
+      </a>
+    </li>
+  </ul>
+</Layout>

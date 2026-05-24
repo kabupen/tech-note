@@ -4,19 +4,36 @@ import Layout from "@/layouts/SimplePage.astro";
 ---
 
 <Layout
-	title="個人開発ページ"
-	description=""
-	pubDate={new Date("2025/11/15")}
-	heroImage={AboutHeroImage}
+  title="個人開発"
+  description=""
+  pubDate={new Date("2025/11/15")}
+  heroImage={AboutHeroImage}
 >
-	<h1>iOSアプリ</h1>
-	趣味でいくつか iOS アプリを作成してみています。あるものないもの作るのが難しい...。
+  <h1>GitHub</h1>
+  <ul class="mt-4 space-y-2 text-lg">
+    <li>
+      <a
+        href="https://github.com/kabupen/jetson-docker-app"
+        class="text-sky-600 hover:underline"
+      >
+        jetson-docker-app
+      </a>
+    </li>
+  </ul>
 
-	<ul class="mt-4 space-y-2">
-		<li>
-			<a href="/devs/ios-app/task-tracker" class="text-sky-600 hover:underline">
-				Task Tracker
-			</a>
-		</li>
-	</ul>
+  <h1>iOSアプリ</h1>
+  これまでに開発した iOS アプリ一覧
+
+  <ul class="mt-4 space-y-2 text-lg">
+    <li>
+      <a href="/devs/ios-app/task-tracker" class="text-sky-600 hover:underline">
+        Task Tracker
+      </a>
+    </li>
+    <li>
+      <a href="/devs/ios-app/sake-labels" class="text-sky-600 hover:underline">
+        サケラベル
+      </a>
+    </li>
+  </ul>
 </Layout>
